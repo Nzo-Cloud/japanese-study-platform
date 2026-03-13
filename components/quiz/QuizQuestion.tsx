@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { QuizQuestion as QuizQuestionType } from '@/types';
 import { cn } from '@/lib/utils';
+import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 
 interface QuizQuestionProps {
   question: QuizQuestionType;
@@ -15,6 +17,7 @@ interface QuizQuestionProps {
 /**
  * Single quiz question display with 4 multiple-choice options.
  * Shows correct/incorrect feedback after selection.
+ * Requires user confirmation before submitting an answer to prevent misclicks.
  */
 export default function QuizQuestion({
   question,
@@ -23,7 +26,20 @@ export default function QuizQuestion({
   questionNumber,
   totalQuestions,
 }: QuizQuestionProps) {
+  const [pendingAnswer, setPendingAnswer] = useState<string | null>(null);
   const isAnswered = selectedAnswer !== null;
+
+  const handleOptionClick = (option: string) => {
+    if (isAnswered) return;
+    setPendingAnswer(option);
+  };
+
+  const handleConfirm = () => {
+    if (pendingAnswer) {
+      onAnswer(pendingAnswer);
+      setPendingAnswer(null);
+    }
+  };
 
   return (
     <div className="animate-fade-in">
@@ -71,7 +87,7 @@ export default function QuizQuestion({
           return (
             <button
               key={i}
-              onClick={() => !isAnswered && onAnswer(option)}
+              onClick={() => handleOptionClick(option)}
               disabled={isAnswered}
               className={cn(
                 'p-4 rounded-xl border-2 text-left transition-all cursor-pointer disabled:cursor-default',
@@ -99,6 +115,39 @@ export default function QuizQuestion({
           )}
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={pendingAnswer !== null}
+        onClose={() => setPendingAnswer(null)}
+        title="Confirm Answer"
+        hideBackdrop
+      >
+        <div className="text-center px-1 py-1">
+          <p className="text-base text-foreground mb-4">
+            Are you sure you want to submit this answer?
+          </p>
+          <div className="font-jp text-base text-foreground/80 mb-6 py-2 px-4 mx-auto w-max max-w-full bg-surface-alt/50 rounded flex items-center justify-center border border-border/50">
+            {pendingAnswer}
+          </div>
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
+            <Button 
+              onClick={() => setPendingAnswer(null)} 
+              variant="outline" 
+              className="w-full sm:w-auto order-last sm:order-first"
+            >
+              Go Back
+            </Button>
+            <Button 
+              onClick={handleConfirm} 
+              variant="primary" 
+              className="w-full sm:w-auto shadow-md"
+            >
+              Confirm
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

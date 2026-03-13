@@ -78,6 +78,7 @@ export default function Navbar() {
     { href: '/study/katakana', label: 'カタカナ Katakana' },
     { href: '/study/kanji', label: '漢字 Kanji' },
     { href: '/study/grammar', label: '文法 Grammar' },
+    { href: '/study/categories', label: 'カテゴリー Categories' },
   ];
 
   const navLinkClass = (path: string) =>

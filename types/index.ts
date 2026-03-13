@@ -33,6 +33,23 @@ export interface GrammarPattern {
   notes: string;
 }
 
+/** A word within a specific Category */
+export interface CategoryWord {
+  id: string;
+  character: string;
+  furiganaHTML: string | null;
+  romaji: string;
+  meaning: string;
+}
+
+/** A Vocabulary Category grouping */
+export interface VocabularyCategory {
+  id: string;
+  titleEn: string;
+  titleJp: string;
+  words: CategoryWord[];
+}
+
 // ─── Quiz Types ──────────────────────────────────────────────
 
 export type QuizType = 'kana' | 'kanji' | 'grammar' | 'mixed' | 'exam';

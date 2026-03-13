@@ -9,12 +9,13 @@ interface ModalProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
+  hideBackdrop?: boolean;
 }
 
 /**
  * Modal dialog with backdrop, escape-to-close, and focus trap.
  */
-export default function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, className, hideBackdrop }: ModalProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -39,7 +40,10 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className={cn(
+          'absolute inset-0',
+          !hideBackdrop && 'bg-black/50 backdrop-blur-sm'
+        )}
         onClick={onClose}
         aria-hidden="true"
       />

@@ -32,7 +32,10 @@ export default function GrammarCard({ grammar }: GrammarCardProps) {
 
       {/* Example */}
       <div className="bg-surface-alt rounded-lg p-4 mb-4">
-        <p className="font-jp text-lg mb-1">{grammar.example}</p>
+        <p 
+          className="font-jp text-lg mb-1 leading-relaxed" 
+          dangerouslySetInnerHTML={{ __html: grammar.example }} 
+        />
         <p className="text-sm text-muted">{grammar.translation}</p>
       </div>
 

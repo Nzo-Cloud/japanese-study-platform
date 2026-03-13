@@ -83,7 +83,10 @@ export default function KanjiCard({ kanji }: KanjiCardProps) {
           <div className="border-l-4 border-primary pl-4">
             <p className="text-sm text-muted mb-1">Example</p>
             <p className="font-jp text-lg mb-1">{kanji.exampleWord}</p>
-            <p className="font-jp text-base text-foreground/80">{kanji.exampleSentence}</p>
+            <p 
+              className="font-jp text-base text-foreground/80 leading-relaxed" 
+              dangerouslySetInnerHTML={{ __html: kanji.exampleSentence }}
+            />
             <p className="text-sm text-muted mt-1">{kanji.translation}</p>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import WhatsNewModal from '@/components/ui/WhatsNewModal';
 
 /**
  * Landing page — hero section, feature highlights, and call to action.
@@ -45,6 +46,7 @@ export default function HomePage() {
 
   return (
     <div>
+      <WhatsNewModal />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />

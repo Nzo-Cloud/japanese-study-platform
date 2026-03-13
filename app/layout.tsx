@@ -32,6 +32,16 @@ export default function RootLayout({
         {/* Footer */}
         <footer className="border-t border-border py-8 text-center text-sm text-muted">
           <p>© {new Date().getFullYear()} NihongoStudy — Built by Lorenzo Balitian</p>
+          <div className="mt-2">
+            <a 
+              href="https://ko-fi.com/kuwago" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline transition-all"
+            >
+              Support this project on Ko-fi ☕
+            </a>
+          </div>
         </footer>
       </body>
     </html>

@@ -1,10 +1,39 @@
-- add more kanji for N5-N3 
-- sentence pattern fill up quiz 
-    example:
-    Choose the correct particle: は / を / で / に
-    私 ___ 日本食レストラン ___ 日本語 ___ 勉強しています。
-    田中さん ___ 図書館 ___ 日本語 ___ 勉強しています。
-    私 ___ 学校 ___ 英語 ___ 勉強しています。
-    山田さん ___ カフェ ___ 日本語 ___ 勉強しています。
-    私 ___ 家 ___ 日本語 ___ 勉強しています。
-- just follow what are the design now we will improve styles and designs later
+# NihongoStudy — Feature Suggestions & Backlog
+
+## Active (next update)
+- PENDING
+
+## Planned (no timeline yet)
+- Jisho link on kanji cards
+  "More on Jisho →" opening jisho.org/search/[kanji]
+  Direct value for JLPT vocabulary section
+
+- Add more kanji N5–N3
+  Current: 105 kanji (N5/N4)
+  Goal: full coverage N5 to N3
+
+- Sentence pattern fill-up quiz
+  Example format:
+  Choose the correct particle: は / を / で / に
+  私 ___ 日本食レストラン ___ 日本語 ___ 勉強しています。
+  田中さん ___ 図書館 ___ 日本語 ___ 勉強しています。
+  私 ___ 学校 ___ 英語 ___ 勉強しています。
+  山田さん ___ カフェ ___ 日本語 ___ 勉強しています。
+  私 ___ 家 ___ 日本語 ___ 勉強しています。
+  Note: follow existing design, no style changes
+
+- Listening section
+  Biggest gap vs real JLPT exam structure
+  JLPT has 3 sections: Language Knowledge,
+  Reading, and Listening
+  Current app covers first two only
+
+## No Priority (suggested, not planned)
+- Stroke order animated SVG
+  Not tested in JLPT exam
+  Nice to have for handwriting learners only
+
+## Design Note
+All new features must follow the current
+design system. No style or layout changes
+until a dedicated design update is planned.

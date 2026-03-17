@@ -2,35 +2,50 @@
 
 /* ─── Design Tokens ──────────────────────────────────────── */
 @theme inline {
-  --color-background: #fafaf9;
-  --color-foreground: #1a1a2e;
-  --color-primary: #dc2626;
-  --color-primary-dark: #b91c1c;
-  --color-primary-light: #fca5a5;
-  --color-secondary: #1e293b;
-  --color-accent: #f59e0b;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-muted: #64748b;
-  --color-success: #10b981;
+  --color-background: #1A1A1B;  /* Sumi-Iro - Deep Ink Black */
+  --color-foreground: #E6E6E6;  /* Gofun - Soft Silk White */
+  --color-primary: #D4AF37;     /* Kinpaku Gold - Metallic Gold */
+  --color-primary-dark: #b8860b;
+  --color-primary-light: #fada5e;
+  --color-secondary: #2C2C2E;   /* Kurotobi - Deep Brown-Black */
+  --color-accent: #B03060;      /* Kurenai - Deep Crimson */
+  --color-surface: #242426;
+  --color-surface-alt: #1E1E1F;
+  --color-border: #3A3A3C;
+  --color-muted: #8E8E93;
+  --color-success: #588157;     /* Matcha Green */
   --color-danger: #ef4444;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-jp: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-jp: "Noto Serif JP", "Noto Sans JP", "Hiragino Mincho ProN", serif;
+  --font-serif: "Noto Serif JP", serif;
 }
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1a1a2e;
-  color-scheme: light;
+  --background: #1A1A1B;
+  --foreground: #E6E6E6;
+  color-scheme: dark;
 }
 
 /* ─── Base Styles ────────────────────────────────────────── */
 body {
-  background: #fafaf9;
-  color: #1a1a2e;
+  background: #1A1A1B;
+  color: #E6E6E6;
   font-family: var(--font-sans), sans-serif;
+  position: relative;
+}
+
+/* 2% Noise Texture Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────── */
@@ -43,7 +58,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-muted);
+  background: #3A3A3C;
   border-radius: 3px;
 }
 
@@ -52,51 +67,113 @@ body {
   font-family: var(--font-jp);
 }
 
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.writing-vertical {
+  writing-mode: vertical-right;
+  text-orientation: upright;
+}
+
 /* ─── Animations ─────────────────────────────────────────── */
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes slideUp {
+/* Premium Shadow Fade */
+@keyframes shadowFade {
   from {
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.10; }
+  50% { opacity: 0.20; }
+}
+
+@keyframes lanternSway {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
 @keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.2); }
+  50% { box-shadow: 0 0 20px 4px rgba(212, 175, 55, 0.15); }
+}
 
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2);
-  }
+@keyframes drift {
+  0% { transform: translateY(-10vh) translateX(0) rotate(0); }
+  100% { transform: translateY(110vh) translateX(10vw) rotate(360deg); }
+}
 
-  50% {
-    box-shadow: 0 0 20px 4px rgba(220, 38, 38, 0.15);
-  }
+@keyframes sway {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(20px); }
 }
 
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-.animate-slide-up {
-  animation: slideUp 0.5s ease-out forwards;
+.animate-shadow-fade {
+  animation: shadowFade 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-drift {
+  animation: drift 10s linear infinite;
+}
+
+.animate-sway {
+  animation: sway 3s ease-in-out infinite;
+}
+
+.animate-lantern {
+  animation: lanternSway 4s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 8s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─── Inkan Stamp ──────────────────────────────────────── */
+.inkan-stamp {
+  display: inline-block;
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  transform: rotate(-15deg);
+  opacity: 0.8;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.5), 0 0 2px var(--color-accent);
+  text-transform: uppercase;
+  background: transparent;
+  position: relative;
+}
+
+.inkan-stamp::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M0 0l10 10M10 0l-10 10' stroke='black' stroke-width='0.5' opacity='0.1'/%3E%3C/svg%3E");
+  opacity: 0.3;
 }

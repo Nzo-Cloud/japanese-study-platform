@@ -9,15 +9,15 @@ export default function WhatsNewModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Show for new version v1.3
-    const hasSeenEvent = sessionStorage.getItem('hasSeenWhatsNewV1_3');
+    // Show for new version v1.4
+    const hasSeenEvent = sessionStorage.getItem('hasSeenWhatsNewV1_4');
     if (!hasSeenEvent) {
       setIsOpen(true);
     }
   }, []);
 
   const handleClose = () => {
-    sessionStorage.setItem('hasSeenWhatsNewV1_3', 'true');
+    sessionStorage.setItem('hasSeenWhatsNewV1_4', 'true');
     setIsOpen(false);
   };
 
@@ -29,29 +29,29 @@ export default function WhatsNewModal() {
     >
       <div className="px-2 pb-2">
         <div className="inline-block bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded mb-4">
-          v1.3 — March 2026
+          v1.4 — Kyoto Nighttime Update
         </div>
 
         <ul className="space-y-4 mb-8">
           <li className="flex items-start">
             <span className="text-primary text-lg leading-none mr-3 mt-0.5">•</span>
             <div>
-              <p className="font-semibold text-foreground">JLPT N3 Kanji Expansion 🎓</p>
-              <p className="text-sm text-muted">Initial batch of 30 common N3 Kanji with readings and examples.</p>
+              <p className="font-semibold text-foreground">Kyoto Night Aesthetics 🌙</p>
+              <p className="text-sm text-muted">Deep "Sumi-Iro" ink theme with metallic gold accents and paper texture.</p>
             </div>
           </li>
           <li className="flex items-start">
             <span className="text-primary text-lg leading-none mr-3 mt-0.5">•</span>
             <div>
-              <p className="font-semibold text-foreground">Custom Quiz Settings ⚙️</p>
-              <p className="text-sm text-muted">Select question counts (10-30) and toggle Auto-Advance for a faster study flow.</p>
+              <p className="font-semibold text-foreground">Atmospheric Lighting ✨</p>
+              <p className="text-sm text-muted">Gently swaying lanterns and a pulsing "Zen" glow system in the Hero section.</p>
             </div>
           </li>
           <li className="flex items-start">
             <span className="text-primary text-lg leading-none mr-3 mt-0.5">•</span>
             <div>
-              <p className="font-semibold text-foreground">Dakuten Mini-Quizzes ⚡</p>
-              <p className="text-sm text-muted">Interactive romaji quizzes added specifically for the Dakuten study pages.</p>
+              <p className="font-semibold text-foreground">Zen Motion Design 🌸</p>
+              <p className="text-sm text-muted">Added Shadow-Fade entrance animations and interactive moonlit sakura falling.</p>
             </div>
           </li>
         </ul>

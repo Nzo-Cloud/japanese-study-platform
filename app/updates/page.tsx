@@ -7,6 +7,25 @@ export const metadata = {
 
 const updates = [
   {
+    version: 'v1.4',
+    date: 'March 18, 2026',
+    title: 'Kyoto Nighttime Overhaul',
+    changes: [
+      {
+        title: 'Premium Dark Theme (Sumi-Iro)',
+        description: 'Complete pivot to a high-end nocturnal aesthetic using traditional ink-black and metallic gold tones.'
+      },
+      {
+        title: 'Kyoto Lantern System',
+        description: 'Atmospheric swaying lanterns and a pulsing hero glow inspired by traditional Japanese lighting.'
+      },
+      {
+        title: 'Zen Motion Design',
+        description: 'Shadow-Fade entrance animations and interactive moonlit Sakura petals for an immersive experience.'
+      }
+    ]
+  },
+  {
     version: 'v1.3',
     date: 'March 17, 2026 (Part 2)',
     title: 'N3 & Quiz Performance',

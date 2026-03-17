@@ -93,14 +93,16 @@ export default function Navbar() {
     );
 
   return (
-    <nav className="sticky top-0 z-40 bg-surface/80 backdrop-blur-lg border-b border-border">
+    <nav className="sticky top-0 z-40 bg-[#1A1A1B]/80 backdrop-blur-md border-b border-[#D4AF37]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl">🏯</span>
-            <span className="font-bold text-lg tracking-tight group-hover:text-primary transition-colors">
-              日本語<span className="text-primary">Study</span>
+            <span className="text-2xl font-bold text-primary font-serif group-hover:drop-shadow-[0_0_8px_rgba(212,175,55,0.6)] transition-all">
+              日本語
+            </span>
+            <span className="hidden sm:inline font-bold tracking-tight text-foreground/90 font-serif">
+              NihongoStudy
             </span>
           </Link>
 

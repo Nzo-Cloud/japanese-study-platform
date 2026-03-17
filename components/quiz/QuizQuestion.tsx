@@ -112,13 +112,20 @@ export default function QuizQuestion({
 
       {/* Feedback */}
       {isAnswered && (
-        <div className="text-center mt-6 animate-fade-in">
+        <div className="text-center mt-10 animate-fade-in relative py-4">
           {selectedAnswer === question.correctAnswer ? (
-            <p className="text-success font-semibold">✓ Correct!</p>
+            <div className="inkan-stamp border-success text-success text-2xl font-serif">
+              正解 — CORRECT
+            </div>
           ) : (
-            <p className="text-danger font-semibold">
-              ✗ Incorrect — the answer is &quot;{question.correctAnswer}&quot;
-            </p>
+            <div className="inkan-stamp border-danger text-danger text-2xl font-serif">
+              不正解 — ERROR
+            </div>
+          )}
+          {! (selectedAnswer === question.correctAnswer) && (
+             <p className="mt-4 text-muted text-sm">
+               The answer is &quot;{question.correctAnswer}&quot;
+             </p>
           )}
         </div>
       )}

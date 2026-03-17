@@ -1,4 +1,4 @@
-# NihongoStudy 🎌 — Japanese Study Platform v1.3.1
+# NihongoStudy 🎌 — Japanese Study Platform v1.4
 
 > Learn Japanese at your own pace. Free, forever.
 
@@ -15,6 +15,12 @@ A full-stack Japanese self-study platform for learners preparing for JLPT N5–N
 🌐 **Live Demo:** [japanese-study-platform.vercel.app](https://japanese-study-platform.vercel.app)
 
 ---
+
+## What's New — v1.4 (March 2026)
++ **Premium Kyoto Nighttime Overhaul** — Complete aesthetic pivot to a "Sumi-Iro" dark theme with metallic gold ink and atmospheric pulse lighting.
++ **Zen Motion Design** — Added "Shadow Fade" entrance animations for a high-end feel and swaying SVG lantern elements.
++ **Interactive Nighttime Visuals** — Sakura-fubuki (petal blizzard) updated for moonlight visibility with interactive mouse repulsion.
++ **Kyoto Lantern Lighting** — Atmospheric radial glow pulsing behind hero text to mimic traditional candlelight.
 
 ## What's New — v1.3.1 (March 2026)
 

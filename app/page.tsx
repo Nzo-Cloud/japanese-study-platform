@@ -13,8 +13,13 @@ export default function HomePage() {
     },
     {
       icon: '漢',
-      title: 'Kanji Study',
-      description: '100+ kanji with readings, meanings, radicals, and example sentences.',
+      title: 'Kanji Mastery',
+      description: 'N5–N3 kanji with readings, radicals, and example sentences.',
+    },
+    {
+      icon: '🔍',
+      title: 'Jisho Integration',
+      description: 'Deep-dive into any Kanji with direct links to Jisho.org for stroke orders and more.',
     },
     {
       icon: '文',
@@ -32,6 +37,11 @@ export default function HomePage() {
       description: 'Spaced repetition system ensures you review items at the optimal time.',
     },
     {
+      icon: '💼',
+      title: 'Work Necessities',
+      description: 'Specialized vocabulary for the workplace: office supplies, electronics, and professional tools.',
+    },
+    {
       icon: '📊',
       title: 'Track Progress',
       description: 'Dashboard with score history, study streaks, and category breakdowns.',
@@ -41,7 +51,7 @@ export default function HomePage() {
   const levels = [
     { level: 'N5', label: 'Beginner', desc: 'Basic vocabulary and simple sentences' },
     { level: 'N4', label: 'Elementary', desc: 'Everyday conversations and basic reading' },
-    { level: 'N3', label: 'Intermediate', desc: 'Natural speech and general topics' },
+    { level: 'N3', label: 'Intermediate', desc: 'Robust natural speech support — Now Fully Live!' },
   ];
 
   return (
@@ -54,7 +64,7 @@ export default function HomePage() {
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6">
               <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              Free JLPT Study Platform
+              v1.3 Live: N3 Expansion & Smart Quiz 🚀
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-6">

@@ -12,10 +12,31 @@ import hiraganaData from '@/data/hiragana.json';
 import katakanaData from '@/data/katakana.json';
 import kanjiData from '@/data/kanji.json';
 import grammarData from '@/data/grammar.json';
+import { hiraganaDakutenData, katakanaDakutenData } from '@/data/kana_dakuten';
 
 const hiragana: Kana[] = hiraganaData as Kana[];
 const katakana: Kana[] = katakanaData as Kana[];
-const allKana: Kana[] = [...hiragana, ...katakana];
+
+// Extract Dakuten characters from grouped data
+const hDakutenAll: Kana[] = hiraganaDakutenData.flatMap(g => 
+  g.pairs.map(p => ({
+    id: `hd-${p.voiced.character}`,
+    character: p.voiced.character,
+    romanization: p.voiced.romanization,
+    type: 'hiragana' as const
+  }))
+);
+
+const kDakutenAll: Kana[] = katakanaDakutenData.flatMap(g => 
+  g.pairs.map(p => ({
+    id: `kd-${p.voiced.character}`,
+    character: p.voiced.character,
+    romanization: p.voiced.romanization,
+    type: 'katakana' as const
+  }))
+);
+
+const allKana: Kana[] = [...hiragana, ...katakana, ...hDakutenAll, ...kDakutenAll];
 const allKanji: Kanji[] = kanjiData as Kanji[];
 const allGrammar: GrammarPattern[] = grammarData as GrammarPattern[];
 

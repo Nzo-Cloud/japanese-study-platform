@@ -12,6 +12,7 @@ interface QuizQuestionProps {
   onAnswer: (answer: string) => void;
   questionNumber: number;
   totalQuestions: number;
+  showConfirmation?: boolean;
 }
 
 /**
@@ -25,13 +26,19 @@ export default function QuizQuestion({
   onAnswer,
   questionNumber,
   totalQuestions,
+  showConfirmation = true,
 }: QuizQuestionProps) {
   const [pendingAnswer, setPendingAnswer] = useState<string | null>(null);
   const isAnswered = selectedAnswer !== null;
 
   const handleOptionClick = (option: string) => {
     if (isAnswered) return;
-    setPendingAnswer(option);
+    
+    if (showConfirmation) {
+      setPendingAnswer(option);
+    } else {
+      onAnswer(option);
+    }
   };
 
   const handleConfirm = () => {

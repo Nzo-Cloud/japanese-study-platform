@@ -13,9 +13,39 @@ export default function ExamPage() {
   const [jlptLevel, setJlptLevel] = useState<JLPTLevel>('N5');
   const [questionCount, setQuestionCount] = useState<number>(10);
   const [timed, setTimed] = useState(true);
+  const [showConfirmation, setShowConfirmation] = useState(true);
+
+  // Load settings from localStorage
+  React.useEffect(() => {
+    const savedCount = localStorage.getItem('quiz_question_count');
+    const savedConfirmation = localStorage.getItem('show_confirmation');
+    const savedTimed = localStorage.getItem('quiz_timed');
+    
+    if (savedCount) setQuestionCount(parseInt(savedCount));
+    if (savedConfirmation) setShowConfirmation(savedConfirmation === 'true');
+    if (savedTimed) setTimed(savedTimed === 'true');
+  }, []);
+
+  // Save settings to localStorage
+  const updateQuestionCount = (n: number) => {
+    setQuestionCount(n);
+    localStorage.setItem('quiz_question_count', n.toString());
+  };
+
+  const toggleTimed = () => {
+    const newVal = !timed;
+    setTimed(newVal);
+    localStorage.setItem('quiz_timed', newVal.toString());
+  };
+
+  const toggleConfirmation = () => {
+    const newVal = !showConfirmation;
+    setShowConfirmation(newVal);
+    localStorage.setItem('show_confirmation', newVal.toString());
+  };
 
   const levels: JLPTLevel[] = ['N5', 'N4', 'N3'];
-  const questionOptions = [10, 25, 50];
+  const questionOptions = [10, 15, 30];
 
   // Time limits: roughly 1 minute per question
   const timeLimit = questionCount * 60;
@@ -63,7 +93,7 @@ export default function ExamPage() {
             {questionOptions.map((n) => (
               <button
                 key={n}
-                onClick={() => setQuestionCount(n)}
+                onClick={() => updateQuestionCount(n)}
                 className={`flex-1 py-3 rounded-xl border-2 font-semibold transition-all cursor-pointer ${
                   questionCount === n
                     ? 'border-primary bg-primary/5 text-primary'
@@ -76,25 +106,54 @@ export default function ExamPage() {
           </div>
         </div>
 
-        {/* Timed toggle */}
-        <div className="flex items-center justify-between bg-surface-alt rounded-xl p-4">
-          <div>
-            <h3 className="font-medium">Timed Mode</h3>
-            <p className="text-sm text-muted">
-              {timed ? `${Math.floor(timeLimit / 60)} minutes for ${questionCount} questions` : 'No time limit'}
-            </p>
-          </div>
+        {/* Quiz Behavior */}
+        <div className="space-y-4">
+          <h2 className="font-semibold">Quiz Settings</h2>
+          
           <button
-            onClick={() => setTimed(!timed)}
-            className={`relative w-12 h-7 rounded-full transition-colors cursor-pointer ${
-              timed ? 'bg-primary' : 'bg-border'
-            }`}
+            onClick={toggleTimed}
+            className="w-full flex items-center justify-between bg-surface-alt rounded-xl p-4 hover:bg-surface-alt/80 transition-all text-left group"
           >
-            <span
-              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
-                timed ? 'translate-x-5' : ''
+            <div>
+              <h3 className="font-medium">Timed Mode</h3>
+              <p className="text-sm text-muted">
+                {timed ? `${Math.floor(timeLimit / 60)} minutes for ${questionCount} questions` : 'No time limit'}
+              </p>
+            </div>
+            <div
+              className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${
+                timed ? 'bg-primary' : 'bg-border'
               }`}
-            />
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  timed ? 'translate-x-5' : ''
+                }`}
+              />
+            </div>
+          </button>
+
+          <button
+            onClick={toggleConfirmation}
+            className="w-full flex items-center justify-between bg-surface-alt rounded-xl p-4 hover:bg-surface-alt/80 transition-all text-left group"
+          >
+            <div>
+              <h3 className="font-medium">Show Confirmation Dialog</h3>
+              <p className="text-sm text-muted">
+                {showConfirmation ? 'Show "Are you sure?" modal before answering' : 'Instant answer selection (Skip modal)'}
+              </p>
+            </div>
+            <div
+              className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${
+                showConfirmation ? 'bg-primary' : 'bg-border'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  showConfirmation ? 'translate-x-5' : ''
+                }`}
+              />
+            </div>
           </button>
         </div>
 
@@ -104,16 +163,17 @@ export default function ExamPage() {
             setConfig({
               quizType: 'exam',
               jlptLevel,
-              questionCount,
-              timed,
-              timeLimit: timed ? timeLimit : undefined,
-            })
-          }
-          size="lg"
-          className="w-full"
-        >
-          Start Exam →
-        </Button>
+               questionCount,
+               timed,
+               timeLimit: timed ? timeLimit : undefined,
+               showConfirmation,
+             })
+           }
+           size="lg"
+           className="w-full"
+         >
+           Start Exam →
+         </Button>
       </div>
     </div>
   );

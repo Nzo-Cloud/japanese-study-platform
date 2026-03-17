@@ -106,6 +106,9 @@ export interface UserProfile {
   study_streak: number;
   total_quizzes_taken: number;
   created_at: string;
+  // Settings
+  quiz_question_count?: number;
+  show_confirmation?: boolean;
 }
 
 // ─── Component Prop Types ────────────────────────────────────
@@ -117,6 +120,8 @@ export interface QuizConfig {
   timed: boolean;
   /** Time limit in seconds (only used when timed is true) */
   timeLimit?: number;
+  /** Whether to show confirmation after answering (default: true) */
+  showConfirmation?: boolean;
 }
 
 export interface QuizAnswer {

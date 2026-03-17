@@ -7,23 +7,40 @@ export const metadata = {
 
 const updates = [
   {
+    version: 'v1.3',
+    date: 'March 17, 2026 (Part 2)',
+    title: 'N3 & Quiz Performance',
+    changes: [
+      {
+        title: 'JLPT N3 Kanji Expansion',
+        description: 'Added an initial batch of 30 common N3-level Kanji entries with readings, examples, and meanings.'
+      },
+      {
+        title: 'Advanced Quiz Settings',
+        description: 'Customize your learning with selectable question counts (10, 15, 30) and an optional auto-advance toggle.',
+        link: '/exam'
+      },
+      {
+        title: 'Dakuten Mini-Quizzes',
+        description: 'Master romaji readings with interactive quizzes integrated into the Dakuten study pages.',
+        link: '/study/hiragana/dakuten'
+      }
+    ]
+  },
+  {
     version: 'v1.2',
-    date: 'March 17, 2026',
+    date: 'March 17, 2026 (Part 1)',
     title: 'Workplace & Character Mastery',
     changes: [
       {
-        title: 'Dakuten & Handakuten Support',
-        description: 'New interactive charts for voiced (゛) and semi-voiced (゜) characters in both Hiragana and Katakana. Master the toggle-based relationship between base and voiced characters.',
-        link: '/study/hiragana/dakuten'
-      },
-      {
-        title: 'Work Necessities Vocabulary',
-        description: 'Curated vocabulary for 8 key industries: General Business, Food Service, Construction, Hospitality, Caregiving, Manufacturing, Retail, and Agriculture.',
+        title: 'Workplace Vocabulary',
+        description: 'Industry-specific phrases for job seekers with full Furigana support across 8 industries.',
         link: '/study/work-necessities'
       },
       {
-        title: 'Dedicated Update History',
-        description: 'Check past updates and follow our development journey on this new dedicated page.'
+        title: 'Dakuten & Handakuten Support',
+        description: 'Detailed interactive charts for voiced Hiragana and Katakana characters.',
+        link: '/study/hiragana/dakuten'
       }
     ]
   },

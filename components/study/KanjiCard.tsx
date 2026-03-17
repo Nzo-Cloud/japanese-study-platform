@@ -89,6 +89,21 @@ export default function KanjiCard({ kanji }: KanjiCardProps) {
             />
             <p className="text-sm text-muted mt-1">{kanji.translation}</p>
           </div>
+
+          {/* Jisho Link */}
+          <div className="pt-4 border-t border-border flex justify-end">
+            <a
+              href={`https://jisho.org/search/${kanji.kanji}%20%23kanji`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-xs font-bold text-primary hover:underline"
+            >
+              View on Jisho (Stroke Order, More Examples) 
+              <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
         </div>
       </Modal>
     </>

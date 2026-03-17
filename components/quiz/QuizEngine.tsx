@@ -88,13 +88,16 @@ export default function QuizEngine({ config, onFinish }: QuizEngineProps) {
       category: question.category,
     };
 
-    setAnswers((prev) => [...prev, quizAnswer]);
+    const updatedAnswers = [...answers, quizAnswer];
+    setAnswers(updatedAnswers);
   };
 
-  const handleNext = () => {
+  const handleNext = (currentAnswers?: QuizAnswer[]) => {
     setSelectedAnswer(null);
+    const finalAnswers = currentAnswers || answers;
+    
     if (currentIndex + 1 >= questions.length) {
-      finishQuiz([...answers]);
+      finishQuiz(finalAnswers);
     } else {
       setCurrentIndex((prev) => prev + 1);
     }
@@ -238,12 +241,13 @@ export default function QuizEngine({ config, onFinish }: QuizEngineProps) {
         onAnswer={handleAnswer}
         questionNumber={currentIndex + 1}
         totalQuestions={questions.length}
+        showConfirmation={config.showConfirmation}
       />
 
       {/* Next button appears after answering */}
       {selectedAnswer && (
         <div className="text-center mt-8 animate-fade-in">
-          <Button onClick={handleNext} variant="primary" size="lg">
+          <Button onClick={() => handleNext()} variant="primary" size="lg">
             {currentIndex + 1 >= questions.length ? 'See Results' : 'Next Question →'}
           </Button>
         </div>

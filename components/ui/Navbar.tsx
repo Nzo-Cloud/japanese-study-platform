@@ -75,10 +75,13 @@ export default function Navbar() {
 
   const studyLinks = [
     { href: '/study/hiragana', label: 'ひらがな Hiragana' },
+    { href: '/study/hiragana/dakuten', label: '　↳ 濁音 Dakuten' },
     { href: '/study/katakana', label: 'カタカナ Katakana' },
+    { href: '/study/katakana/dakuten', label: '　↳ 濁音 Dakuten' },
     { href: '/study/kanji', label: '漢字 Kanji' },
     { href: '/study/grammar', label: '文法 Grammar' },
     { href: '/study/categories', label: 'カテゴリー Categories' },
+    { href: '/study/work-necessities', label: '💼 Work Necessities' },
   ];
 
   const navLinkClass = (path: string) =>

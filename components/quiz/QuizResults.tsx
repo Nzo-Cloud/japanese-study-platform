@@ -4,6 +4,10 @@ import React from 'react';
 import { QuizAnswer } from '@/types';
 import Button from '@/components/ui/Button';
 import { calculateAccuracy } from '@/lib/utils';
+import { useState } from 'react';
+import grammarData from '@/data/grammar.json';
+import kanjiData from '@/data/kanji.json';
+import { particleSentences } from '@/data/particles';
 
 interface QuizResultsProps {
   answers: QuizAnswer[];
@@ -19,6 +23,26 @@ export default function QuizResults({ answers, quizType, onRetry, onHome }: Quiz
   const correct = answers.filter((a) => a.isCorrect).length;
   const total = answers.length;
   const accuracy = calculateAccuracy(correct, total);
+
+  const [showReview, setShowReview] = useState(false);
+  const wrongAnswers = answers.filter(a => !a.isCorrect);
+  const wrongCount = wrongAnswers.length;
+
+  const getExplanation = (answer: QuizAnswer) => {
+    switch (answer.category) {
+      case 'grammar':
+        const grammar = grammarData.find(g => g.id === answer.itemId);
+        return grammar?.notes ? `💡 ${grammar.notes}` : null;
+      case 'kanji':
+        const kanji = kanjiData.find(k => k.id === answer.itemId);
+        return kanji ? `💡 Meaning: ${kanji.meaning} | Reading: ${kanji.onyomi.join(', ')} / ${kanji.kunyomi.join(', ')}` : null;
+      case 'particles':
+        const particle = particleSentences.find(p => p.id === answer.itemId);
+        return particle?.hint ? `💡 ${particle.hint}` : null;
+      default:
+        return null;
+    }
+  };
 
   // Score message based on accuracy
   const getMessage = () => {
@@ -86,34 +110,71 @@ export default function QuizResults({ answers, quizType, onRetry, onHome }: Quiz
         </div>
       </div>
 
-      {/* Answer Review */}
-      <div className="bg-surface rounded-2xl border border-border p-6 mb-8">
-        <h3 className="font-semibold mb-4">Answer Review</h3>
-        <div className="space-y-3">
-          {answers.map((answer, i) => (
-            <div
-              key={i}
-              className={`flex items-center gap-3 p-3 rounded-lg text-sm ${
-                answer.isCorrect
-                  ? 'bg-success/5 border border-success/20'
-                  : 'bg-danger/5 border border-danger/20'
-              }`}
-            >
-              <span className={`font-semibold ${answer.isCorrect ? 'text-success' : 'text-danger'}`}>
-                {answer.isCorrect ? '✓' : '✗'}
-              </span>
-              <span className="text-muted w-6">{i + 1}.</span>
-              <span className="flex-1">
-                Your answer: <span className="font-medium">{answer.selectedAnswer}</span>
-              </span>
-              {!answer.isCorrect && (
-                <span className="text-success">
-                  Correct: <span className="font-medium">{answer.correctAnswer}</span>
-                </span>
-              )}
+      {/* Answer Review Section */}
+      <div className="mb-8">
+        {wrongCount === 0 ? (
+          <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4 text-center text-green-400 text-sm mb-8">
+            🎉 Perfect score — no mistakes to review!
+          </div>
+        ) : !showReview ? (
+          <button
+            onClick={() => setShowReview(true)}
+            className="w-full mb-8 py-4 rounded-xl border-2 border-rose-500/30 bg-rose-500/5 text-rose-400 hover:bg-rose-500/10 transition-all font-medium flex items-center justify-center gap-2"
+          >
+            📋 Review Mistakes ({wrongCount} wrong answers)
+          </button>
+        ) : (
+          <div className="bg-surface rounded-2xl border border-border p-6 mb-8 shadow-md">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-lg text-foreground">Mistake Review</h3>
+              <button
+                onClick={() => setShowReview(false)}
+                className="text-xs text-muted hover:text-foreground transition-colors"
+              >
+                Hide Review ↑
+              </button>
             </div>
-          ))}
-        </div>
+            <div className="space-y-4">
+              {wrongAnswers.map((answer, index) => {
+                const explanation = getExplanation(answer);
+                return (
+                  <div key={index} className="bg-surface-alt border border-rose-500/20 rounded-xl p-5 shadow-sm">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="bg-primary/10 text-primary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full tracking-wider">
+                        {answer.category}
+                      </span>
+                      <span className="text-xs text-muted font-mono">Q{index + 1}</span>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <p 
+                        className="text-base font-jp text-foreground leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: answer.questionText || answer.correctAnswer }}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pb-1">
+                      <div>
+                        <p className="text-[10px] uppercase text-muted font-bold mb-1">Your Answer</p>
+                        <p className="text-rose-400 font-jp" dangerouslySetInnerHTML={{ __html: `✗ ${answer.selectedAnswer || '(No answer)'}` }} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase text-muted font-bold mb-1">Correct Answer</p>
+                        <p className="text-primary font-jp" dangerouslySetInnerHTML={{ __html: `✓ ${answer.correctAnswer}` }} />
+                      </div>
+                    </div>
+
+                    {explanation && (
+                      <div className="text-sm text-muted italic border-t border-border/50 pt-3 mt-3">
+                        {explanation}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Actions */}

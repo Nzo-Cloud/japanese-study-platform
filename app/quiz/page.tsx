@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { QuizConfig, QuizType, JLPTLevel } from '@/types';
 import QuizEngine from '@/components/quiz/QuizEngine';
+import ParticleQuizEngine from '@/components/quiz/ParticleQuizEngine';
 import Button from '@/components/ui/Button';
 
 /**
@@ -10,7 +11,7 @@ import Button from '@/components/ui/Button';
  */
 export default function QuizPage() {
   const [config, setConfig] = useState<QuizConfig | null>(null);
-  const [quizType, setQuizType] = useState<QuizType>('kana');
+  const [quizType, setQuizType] = useState<QuizType>('kanji');
   const [jlptLevel, setJlptLevel] = useState<JLPTLevel>('N5');
   const [questionCount, setQuestionCount] = useState<number>(10);
   const [showConfirmation, setShowConfirmation] = useState(true);
@@ -36,10 +37,10 @@ export default function QuizPage() {
   };
 
   const quizTypes: { value: QuizType; label: string; icon: string }[] = [
-    { value: 'kana', label: 'Kana', icon: 'あ' },
     { value: 'kanji', label: 'Kanji', icon: '漢' },
     { value: 'grammar', label: 'Grammar', icon: '文' },
-    { value: 'mixed', label: 'Mixed', icon: '🎲' },
+    { value: 'particles', label: 'Particles', icon: '助' },
+    { value: 'all', label: 'All', icon: '全' },
   ];
 
   const levels: JLPTLevel[] = ['N5', 'N4', 'N3'];
@@ -48,7 +49,11 @@ export default function QuizPage() {
   if (config) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <QuizEngine config={config} onFinish={() => setConfig(null)} />
+        {config.quizType === 'particles' ? (
+          <ParticleQuizEngine config={config} onFinish={() => setConfig(null)} />
+        ) : (
+          <QuizEngine config={config} onFinish={() => setConfig(null)} />
+        )}
       </div>
     );
   }

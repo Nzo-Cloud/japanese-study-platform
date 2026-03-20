@@ -52,7 +52,7 @@ export interface VocabularyCategory {
 
 // ─── Quiz Types ──────────────────────────────────────────────
 
-export type QuizType = 'kana' | 'kanji' | 'grammar' | 'mixed' | 'exam';
+export type QuizType = 'kanji' | 'grammar' | 'particles' | 'all' | 'exam';
 export type JLPTLevel = 'N5' | 'N4' | 'N3';
 
 /** A single quiz question */
@@ -64,7 +64,8 @@ export interface QuizQuestion {
   options: string[];
   correctAnswer: string;
   /** Type of content this question tests */
-  category: 'kana' | 'kanji' | 'grammar';
+  /** Type of content this question tests */
+  category: any;
   /** Reference ID to the source data item */
   itemId: string;
 }
@@ -87,7 +88,7 @@ export interface QuizResult {
 export interface SRSItem {
   id: string;
   user_id: string;
-  item_type: 'kana' | 'kanji' | 'grammar';
+  item_type: 'kana' | 'kanji' | 'grammar' | 'particles';
   item_id: string;
   last_reviewed: string;
   next_review: string;
@@ -126,11 +127,12 @@ export interface QuizConfig {
 
 export interface QuizAnswer {
   questionId: string;
+  questionText?: string;
   selectedAnswer: string;
   correctAnswer: string;
   isCorrect: boolean;
   itemId: string;
-  category: 'kana' | 'kanji' | 'grammar';
+  category: any;
 }
 
 /** Dashboard statistics */
@@ -145,4 +147,79 @@ export interface DashboardStats {
     grammar: { count: number; avgAccuracy: number };
   };
   recentResults: QuizResult[];
+}
+
+// ─── Particle Quiz Types ─────────────────────────────────────
+
+/** A sentence with 1–3 particle blanks for the fill-in-the-blank quiz */
+export interface ParticleSentence {
+  id: string;
+  jlptLevel: 'N5' | 'N4' | 'N3';
+  segments: Array<{
+    type: 'text' | 'blank';
+    /** For 'text': the Japanese text. For 'blank': the correct particle answer. */
+    content: string;
+  }>;
+  /** English translation of the full sentence */
+  english: string;
+  /** Optional grammar hint shown after answering */
+  hint?: string;
+}
+
+/** A single answered blank within a particle sentence */
+export interface ParticleAnswer {
+  sentenceId: string;
+  blankIndex: number;
+  selectedParticle: string;
+  correctParticle: string;
+  isCorrect: boolean;
+}
+
+// ─── Vocabulary Types ────────────────────────────────────────
+
+/** A single vocabulary word for the flashcard system */
+export interface VocabWord {
+  id: string;
+  japanese: string;
+  reading: string;
+  english: string;
+  exampleJa: string;
+  exampleEn: string;
+  jlptLevel: 'N5' | 'N4' | 'N3';
+  category: string;
+}
+
+/** A single flashcard review session entry */
+export interface VocabSession {
+  wordId: string;
+  known: boolean;
+  reviewedAt: string;
+}
+
+// ─── Exam Types ──────────────────────────────────────────────
+
+export type ExamSection = 'language' | 'reading' | 'listening';
+export type ExamStatus = 'lobby' | 'in-progress' | 'break' | 'complete';
+
+export interface ExamSectionConfig {
+  section: ExamSection;
+  label: string;           // e.g. '言語知識 Language Knowledge'
+  labelEn: string;         // e.g. 'Language Knowledge'
+  questionCount: number;
+  timeLimitMinutes: number;
+  quizTypes: QuizType[];   // which quiz types to draw from
+}
+
+export interface ExamConfig {
+  jlptLevel: JLPTLevel;
+  sections: ExamSectionConfig[];
+}
+
+export interface ExamResult {
+  section: ExamSection;
+  score: number;
+  total: number;
+  accuracy: number;
+  passed: boolean;         // >= 50% to pass each section
+  timeTakenSeconds: number;
 }

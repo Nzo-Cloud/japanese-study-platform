@@ -63,6 +63,7 @@ export default function QuizEngine({ config, onFinish }: QuizEngineProps) {
     const remaining = questions.slice(currentIndex);
     const autoAnswers: QuizAnswer[] = remaining.map((q) => ({
       questionId: q.id,
+      questionText: q.questionText,
       selectedAnswer: '',
       correctAnswer: q.correctAnswer,
       isCorrect: false,
@@ -81,6 +82,7 @@ export default function QuizEngine({ config, onFinish }: QuizEngineProps) {
 
     const quizAnswer: QuizAnswer = {
       questionId: question.id,
+      questionText: question.questionText,
       selectedAnswer: answer,
       correctAnswer: question.correctAnswer,
       isCorrect,

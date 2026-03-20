@@ -3,70 +3,50 @@
  * from kana, kanji, and grammar datasets.
  */
 
-import { Kana, Kanji, GrammarPattern, QuizQuestion, QuizType, JLPTLevel } from '@/types';
+import { Kanji, GrammarPattern, QuizQuestion, QuizType, JLPTLevel, ParticleSentence } from '@/types';
 import { shuffleArray, pickRandom, generateId } from './utils';
 
 // ─── Data imports ────────────────────────────────────────────
 
-import hiraganaData from '@/data/hiragana.json';
-import katakanaData from '@/data/katakana.json';
 import kanjiData from '@/data/kanji.json';
 import grammarData from '@/data/grammar.json';
-import { hiraganaDakutenData, katakanaDakutenData } from '@/data/kana_dakuten';
+import { particleSentences } from '@/data/particles';
 
-const hiragana: Kana[] = hiraganaData as Kana[];
-const katakana: Kana[] = katakanaData as Kana[];
-
-// Extract Dakuten characters from grouped data
-const hDakutenAll: Kana[] = hiraganaDakutenData.flatMap(g => 
-  g.pairs.map(p => ({
-    id: `hd-${p.voiced.character}`,
-    character: p.voiced.character,
-    romanization: p.voiced.romanization,
-    type: 'hiragana' as const
-  }))
-);
-
-const kDakutenAll: Kana[] = katakanaDakutenData.flatMap(g => 
-  g.pairs.map(p => ({
-    id: `kd-${p.voiced.character}`,
-    character: p.voiced.character,
-    romanization: p.voiced.romanization,
-    type: 'katakana' as const
-  }))
-);
-
-const allKana: Kana[] = [...hiragana, ...katakana, ...hDakutenAll, ...kDakutenAll];
 const allKanji: Kanji[] = kanjiData as Kanji[];
 const allGrammar: GrammarPattern[] = grammarData as GrammarPattern[];
 
 // ─── Question Generators ─────────────────────────────────────
 
 /**
- * Generate a kana quiz question: "What is the romanization of [character]?"
- * User picks from 4 romanization options.
+ * Generate a particle fill-in-the-blank question.
  */
-function generateKanaQuestion(pool: Kana[]): QuizQuestion | null {
-  if (pool.length < 4) return null;
+function generateParticleQuestion(pool: ParticleSentence[]): QuizQuestion | null {
+  if (pool.length === 0) return null;
+  const sentence = pool[Math.floor(Math.random() * pool.length)];
 
-  const target = pool[Math.floor(Math.random() * pool.length)];
+  const blanks = sentence.segments.map((s, i) => ({ s, i })).filter(item => item.s.type === 'blank');
+  if (blanks.length === 0) return null;
 
-  // Pick 3 wrong answers from the pool
-  const wrongOptions = pickRandom(
-    pool.filter((k) => k.id !== target.id),
-    3
-  ).map((k) => k.romanization);
+  const targetBlankInfo = blanks[Math.floor(Math.random() * blanks.length)];
+  const correctParticle = targetBlankInfo.s.content;
 
-  const options = shuffleArray([target.romanization, ...wrongOptions]);
+  const questionText = sentence.segments.map((s, i) => {
+    if (i === targetBlankInfo.i) return '___';
+    return s.content;
+  }).join('');
+
+  const distractorsPool = ['は','を','に','が','も','で','へ','と','から','まで','より','けど','ので','のに'].filter(p => p !== correctParticle);
+  const wrongOptions = pickRandom(distractorsPool, 3);
+  const options = shuffleArray([correctParticle, ...wrongOptions]);
 
   return {
     id: generateId(),
-    questionText: `What is the romanization of this character?`,
-    displayText: target.character,
+    questionText: `Which particle fits the blank?`,
+    displayText: questionText,
     options,
-    correctAnswer: target.romanization,
-    category: 'kana',
-    itemId: `${target.type}-${target.id}`,
+    correctAnswer: correctParticle,
+    category: 'particles',
+    itemId: sentence.id,
   };
 }
 
@@ -143,27 +123,28 @@ export function generateQuiz(
   // Filter data by JLPT level
   const filteredKanji = allKanji.filter((k) => k.jlptLevel === jlptLevel);
   const filteredGrammar = allGrammar.filter((g) => g.jlptLevel === jlptLevel);
+  const filteredParticles = particleSentences.filter((p) => p.jlptLevel === jlptLevel);
 
   // Determine which generators to use based on quiz type
   const generators: (() => QuizQuestion | null)[] = [];
 
   switch (quizType) {
-    case 'kana':
-      generators.push(() => generateKanaQuestion(allKana));
-      break;
     case 'kanji':
       generators.push(() => generateKanjiQuestion(filteredKanji.length >= 4 ? filteredKanji : allKanji));
       break;
     case 'grammar':
       generators.push(() => generateGrammarQuestion(filteredGrammar.length >= 4 ? filteredGrammar : allGrammar));
       break;
-    case 'mixed':
+    case 'particles':
+      generators.push(() => generateParticleQuestion(filteredParticles.length > 0 ? filteredParticles : particleSentences));
+      break;
+    case 'all':
     case 'exam':
-      // Mix all types for mixed/exam quizzes
+      // Mix kanji, grammar, and particles
       generators.push(
-        () => generateKanaQuestion(allKana),
         () => generateKanjiQuestion(filteredKanji.length >= 4 ? filteredKanji : allKanji),
-        () => generateGrammarQuestion(filteredGrammar.length >= 4 ? filteredGrammar : allGrammar)
+        () => generateGrammarQuestion(filteredGrammar.length >= 4 ? filteredGrammar : allGrammar),
+        () => generateParticleQuestion(filteredParticles.length > 0 ? filteredParticles : particleSentences)
       );
       break;
   }
@@ -195,7 +176,7 @@ export function generateQuiz(
  * Generate a quiz from specific SRS items (for review sessions).
  */
 export function generateSRSQuiz(
-  itemIds: { type: 'kana' | 'kanji' | 'grammar'; id: string }[]
+  itemIds: { type: 'kana' | 'kanji' | 'grammar' | 'particles'; id: string }[]
 ): QuizQuestion[] {
   const questions: QuizQuestion[] = [];
 
@@ -203,24 +184,10 @@ export function generateSRSQuiz(
     let question: QuizQuestion | null = null;
 
     switch (item.type) {
-      case 'kana': {
-        const kanaItem = allKana.find(
-          (k) => `${k.type}-${k.id}` === item.id || k.id === item.id
-        );
-        if (kanaItem) {
-          question = generateKanaQuestion(allKana);
-          if (question) {
-            // Override to use the specific item
-            question.displayText = kanaItem.character;
-            question.correctAnswer = kanaItem.romanization;
-            question.itemId = `${kanaItem.type}-${kanaItem.id}`;
-            // Rebuild options with correct answer
-            const wrongOptions = pickRandom(
-              allKana.filter((k) => k.id !== kanaItem.id),
-              3
-            ).map((k) => k.romanization);
-            question.options = shuffleArray([kanaItem.romanization, ...wrongOptions]);
-          }
+      case 'particles': {
+        const pItem = particleSentences.find((p) => p.id === item.id);
+        if (pItem) {
+          question = generateParticleQuestion([pItem]);
         }
         break;
       }

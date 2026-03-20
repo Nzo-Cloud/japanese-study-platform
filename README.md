@@ -1,4 +1,4 @@
-# NihongoStudy 🎌 — Japanese Study Platform v1.4
+# NihongoStudy 🎌 — Japanese Study Platform v1.5
 
 > Learn Japanese at your own pace. Free, forever.
 
@@ -15,6 +15,22 @@ A full-stack Japanese self-study platform for learners preparing for JLPT N5–N
 🌐 **Live Demo:** [japanese-study-platform.vercel.app](https://japanese-study-platform.vercel.app)
 
 ---
+
+## What's New — v1.5 (March 2026)
+
+*   **Particle Fill-in-the-Blank Quiz** — New quiz type where users fill blank slots in Japanese sentences with the correct particle (は/を/で/に/が/も and more). Sequential blanks, furigana on all kanji, per-blank scoring, N5–N3 levels.
+
+*   **SRS Vocabulary Flashcards** — 300 JLPT-accurate words across N5, N4, N3. Flip card interface with JP→EN and EN→JP modes, Know it / Don't know it binary rating, spaced repetition re-queue, and Recharts bar + line charts for session and 7-day progress tracking.
+
+*   **Real Mock JLPT Exam** — Rebuilt from scratch to match official JLPT structure. Sequential sections with individual timers: 言語知識 Language Knowledge (Kanji) and 読解 Grammar & Reading. Force-advance on timer zero. Break screens between sections. 聴解 Listening placeholder (in development). Per-section pass/fail results with Recharts performance chart.
+
+*   **Wrong Answers Review** — Available after every quiz and exam. Collapsible review panel showing question, your answer, correct answer, and a 💡 explanation sourced from study data (kanji meaning/reading, grammar notes, particle hints).
+
+*   **Hiragana & Katakana Unified Pages** — Basic and Dakuten characters merged into one page each with tab switching. Shared Mini Quiz resets per tab. Dakuten sub-links removed from navbar.
+
+*   **Quiz Refocused** — Removed Kana quiz type (covered by Mini Quiz on study pages). Renamed Mixed to All — now pulls from Kanji + Grammar + Particles only. Exam sections now use correct question type pools.
+
+*   **Work Nav Item** — Work Necessities promoted from Study dropdown to its own top-level direct nav link for faster access by work-focused learners.
 
 ## What's New — v1.4 (March 2026)
 + **Premium Kyoto Nighttime Overhaul** — Complete aesthetic pivot to a "Sumi-Iro" dark theme with metallic gold ink and atmospheric pulse lighting.
@@ -34,14 +50,17 @@ A full-stack Japanese self-study platform for learners preparing for JLPT N5–N
 
 ## Features
 
-- **Kana Mastery** — Interactive hiragana & katakana charts with mini quiz mode and full Dakuten support.
+- **Kana Mastery** — Interactive hiragana & katakana charts with unified Basic/Dakuten views and per-tab mini quizzes.
 - **Kanji Study** — Comprehensive list (N5–N3) with readings, meanings, radicals, and "View on Jisho" integration.
 - **Grammar Lessons** — 35+ patterns (N5–N3) with furigana-annotated example sentences.
+- **Vocabulary Flashcards** — SRS-backed study system with flip cards and visual progress tracking.
 - **Categories Study** — Vocabulary grouped by topic: Numbers, Days, Months, Body Parts, Colors, Family, Food, Animals, Places, and Time.
-- **Smart Quizzes** — Randomized multiple-choice quizzes with optional "Safety" confirmation modal.
-- **Mock JLPT Exams** — Timed mixed quizzes simulating real exam conditions with persistent settings.
+- **Work Essentials** — Dedicated industry-specific vocabulary for professional environments in Japan.
+- **Smart Quizzes** — Multiple quiz modes including Multiple Choice and the new **Particle Fill-in-the-Blank**.
+- **Mock JLPT Exams** — Realistic sequential exam simulation with timers, section rules, and per-section pass/fail metrics.
+- **Wrong Answers Review** — Deep mistake analysis with data-driven explanations following every session.
 - **Spaced Repetition (SRS)** — SM-2 algorithm tracks and schedules reviews automatically.
-- **Progress Dashboard** — Score history, study streaks, and category breakdowns.
+- **Progress Dashboard** — Score history, study streaks, and detailed performance visualization via Recharts.
 
 ---
 

@@ -47,7 +47,6 @@ export default function Navbar() {
     return () => { listener.subscription.unsubscribe(); };
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -58,7 +57,6 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Close mobile menu on navigation
   useEffect(() => {
     setIsMobileOpen(false);
     setIsStudyOpen(false);
@@ -79,7 +77,6 @@ export default function Navbar() {
     { href: '/study/kanji', label: '漢字 Kanji' },
     { href: '/study/grammar', label: '文法 Grammar' },
     { href: '/study/categories', label: 'カテゴリー Categories' },
-    { href: '/study/work-necessities', label: '💼 Work Necessities' },
     { href: '/study/vocabulary', label: '単語 Vocabulary' },
   ];
 
@@ -113,7 +110,7 @@ export default function Navbar() {
                 onClick={() => setIsStudyOpen(!isStudyOpen)}
                 className={cn(
                   'px-3 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1 cursor-pointer',
-                  pathname.startsWith('/study')
+                  pathname.startsWith('/study') && !pathname.startsWith('/study/work-necessities')
                     ? 'text-primary bg-primary/10'
                     : 'text-foreground/70 hover:text-foreground hover:bg-surface-alt'
                 )}
@@ -149,6 +146,7 @@ export default function Navbar() {
 
             <Link href="/quiz" className={navLinkClass('/quiz')}>Quiz</Link>
             <Link href="/exam" className={navLinkClass('/exam')}>Mock Exam</Link>
+            <Link href="/study/work-necessities" className={navLinkClass('/study/work-necessities')}>Work</Link>
             {user && <Link href="/dashboard" className={navLinkClass('/dashboard')}>Progress</Link>}
           </div>
 
@@ -213,7 +211,14 @@ export default function Navbar() {
               <div className="border-t border-border my-2" />
               <Link href="/quiz" className={cn('block', navLinkClass('/quiz'))}>Quiz</Link>
               <Link href="/exam" className={cn('block', navLinkClass('/exam'))}>Mock Exam</Link>
-              {user && <Link href="/dashboard" className={cn('block', navLinkClass('/dashboard'))}>Progress</Link>}
+              <Link href="/study/work-necessities" className={cn('block', navLinkClass('/study/work-necessities'))}>Work</Link>
+              
+              {user && (
+                <>
+                  <div className="border-t border-border my-2" />
+                  <Link href="/dashboard" className={cn('block', navLinkClass('/dashboard'))}>Progress</Link>
+                </>
+              )}
               <div className="border-t border-border my-2" />
               {user ? (
                 <button

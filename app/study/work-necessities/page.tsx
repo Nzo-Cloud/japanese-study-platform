@@ -9,7 +9,7 @@ export default function WorkNecessitiesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-12 text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4">仕事の基本 <span className="text-primary italic">Work Necessities</span></h1>
+        <h1 className="text-3xl font-bold mb-2"><span className="text-primary font-jp">仕事の基本</span> Work Necessities</h1>
         <p className="text-lg text-muted">
           Essential vocabulary and real-world contextual sentences for various professional fields in Japan. 
           Perfect for those starting or looking to transition into a new industry.

@@ -7,6 +7,37 @@ export const metadata = {
 
 const updates = [
   {
+    version: 'v1.5',
+    date: 'March 20, 2026',
+    title: 'Study Arsenal Update',
+    changes: [
+      {
+        title: 'Particle Fill-in-the-Blank Quiz',
+        description: 'New quiz type with sequential blank filling, furigana support, and per-blank scoring across N5–N3 levels.'
+      },
+      {
+        title: 'Vocabulary Flashcards (SRS)',
+        description: '300 JLPT-accurate words with flip cards, Know it / Don\'t know it rating, and Recharts progress charts.'
+      },
+      {
+        title: 'Real Mock JLPT Exam',
+        description: 'Full 3-section exam matching official JLPT structure — Language Knowledge, Grammar & Reading, and Listening placeholder. Section timers and pass/fail results.'
+      },
+      {
+        title: 'Wrong Answers Review',
+        description: 'Collapsible review panel after every quiz and exam showing correct answers and 💡 explanations from study data.'
+      },
+      {
+        title: 'Hiragana & Katakana Unified',
+        description: 'Basic and Dakuten characters merged into one tabbed page each with a shared Mini Quiz.'
+      },
+      {
+        title: 'Work Nav Item',
+        description: 'Work Necessities promoted to its own top-level nav link for faster access by work-focused learners.'
+      }
+    ]
+  },
+  {
     version: 'v1.4',
     date: 'March 18, 2026',
     title: 'Kyoto Nighttime Overhaul',

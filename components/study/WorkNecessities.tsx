@@ -25,12 +25,6 @@ export default function WorkNecessities() {
             className="w-full flex items-center justify-between px-6 py-5 cursor-pointer text-left"
           >
             <div className="flex items-center gap-4">
-              <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300",
-                openCategoryId === category.id ? "bg-primary text-white" : "bg-primary/10 text-primary"
-              )}>
-                {getCategoryIcon(category.id)}
-              </div>
               <h3 className={cn(
                 "text-lg font-bold transition-colors duration-300",
                 openCategoryId === category.id ? "text-primary" : "text-foreground"
@@ -100,16 +94,4 @@ function WorkNecessityCard({ item }: { item: WorkNecessityItem }) {
   );
 }
 
-function getCategoryIcon(id: string) {
-  switch (id) {
-    case 'general': return '💼';
-    case 'food_service': return '🍱';
-    case 'construction': return '🏗️';
-    case 'hospitality': return '🏨';
-    case 'caregiving': return '👵';
-    case 'manufacturing': return '⚙️';
-    case 'retail': return '🛍️';
-    case 'agriculture': return '🚜';
-    default: return '📁';
-  }
-}
+

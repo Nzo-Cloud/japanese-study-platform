@@ -62,24 +62,24 @@ export default function HomePage() {
     <div className="relative overflow-hidden bg-background">
       <WhatsNewModal />
       <SakuraPetals />
-      
+
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden">
         {/* Lantern Glow Pulse */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-[600px] bg-[radial-gradient(circle,rgba(212,175,55,0.15)_0%,rgba(26,26,27,0)_70%)] animate-glow-pulse pointer-events-none z-0" />
-        
+
         <HangingLantern className="left-8 top-0" />
         <HangingLantern className="right-8 top-0" style={{ animationDelay: '1s' }} />
 
         <JapaneseCastle />
         <SakuraGrove />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="text-left max-w-2xl animate-shadow-fade">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-primary/20">
                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                v1.4 Live — Premium Kyoto Night 🌙
+                v1.5 Live — Study Arsenal Update
               </div>
 
               <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-8 font-serif leading-tight text-foreground drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
@@ -89,7 +89,7 @@ export default function HomePage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-muted font-normal tracking-wide max-w-xl mb-12 leading-relaxed">
-                Step into a high-end self-study platform. 
+                Step into a high-end self-study platform.
                 Experience Japanese mastery through the lens of Kyoto&apos;s timeless nighttime beauty.
               </p>
 
@@ -108,7 +108,7 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-            
+
             {/* Vertical Accent Text - Shifted right and layered */}
             <div className="hidden lg:block animate-shadow-fade relative z-[15] translate-x-12" style={{ animationDelay: '0.4s' }}>
               <div className="writing-vertical text-6xl font-serif text-primary/30 select-none animate-pulse drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
@@ -174,7 +174,7 @@ export default function HomePage() {
         <div className="relative overflow-hidden bg-secondary border border-primary/20 rounded-[2.5rem] p-12 sm:p-20 text-center text-foreground shadow-2xl animate-shadow-fade">
           {/* Night texture overlay */}
           <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #D4AF37 1px, transparent 0)', backgroundSize: '48px 48px' }} />
-          
+
           <div className="relative z-10">
             <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6 leading-tight text-foreground drop-shadow-md">Step Into the Moonlight</h2>
             <p className="text-muted max-w-xl mx-auto mb-10 text-lg leading-relaxed">

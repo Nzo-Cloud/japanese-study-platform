@@ -1,4 +1,4 @@
-# NihongoStudy 🎌 — Japanese Study Platform v1.5
+# NihongoStudy 🎌 — Japanese Study Platform v1.5.1
 
 > Learn Japanese at your own pace. Free, forever.
 
@@ -6,7 +6,7 @@ A full-stack Japanese self-study platform for learners preparing for JLPT N5–N
 
 [![Live Site](https://img.shields.io/badge/Live%20Site-nihongostudy.vercel.app-red?style=flat-square)](https://japanese-study-platform.vercel.app)
 [![GitHub](https://img.shields.io/badge/GitHub-Nzo--Cloud-black?style=flat-square&logo=github)](https://github.com/Nzo-Cloud/japanese-study-platform)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=flat-square&logo=supabase)](https://supabase.com)
 [![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
 
@@ -15,6 +15,16 @@ A full-stack Japanese self-study platform for learners preparing for JLPT N5–N
 🌐 **Live Demo:** [japanese-study-platform.vercel.app](https://japanese-study-platform.vercel.app)
 
 ---
+
+## What's New — v1.5.1 (March 2026)
+
+*   **Security Hardening** — Full production security audit completed. Added HTTP security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options), rate limiting on all API routes, and a Privacy Policy page (/privacy).
+
+*   **Dependency Updates** — Upgraded Next.js 16.1.6 → 16.2.1 fixing 5 security vulnerabilities including HTTP request smuggling and CSRF bypass. Zero npm audit vulnerabilities.
+
+*   **Error Monitoring** — Sentry Next.js SDK integrated for real-time error tracking and performance monitoring in production.
+
+*   **Privacy Policy** — Published at /privacy covering data collection, storage, user rights under Philippines RA 10173 and GDPR principles, and third-party services.
 
 ## What's New — v1.5 (March 2026)
 
@@ -72,11 +82,27 @@ It also became a proof of concept for AI-assisted development — I built it in 
 
 ---
 
+## Security
+
+NihongoStudy takes user data seriously. Key measures in place:
+
+- **Row Level Security (RLS)** enabled on all Supabase tables
+- **HTTP Security Headers** — CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy on all routes
+- **Rate Limiting** on all API endpoints
+- **Sentry** error tracking and performance monitoring
+- **Branch Protection** on main — all changes via Pull Request
+- **Privacy Policy** published at /privacy
+- **Philippines Data Privacy Act (RA 10173)** compliant
+
+---
+
 ## Tech Stack
 
-- **Frontend:** Next.js 14 (App Router), React, TypeScript, TailwindCSS
+- **Frontend:** Next.js 16.2.1 (App Router, Turbopack), React, TypeScript, TailwindCSS
 - **Backend:** Next.js API Routes
 - **Database + Auth:** Supabase (PostgreSQL + Supabase Auth)
+- **Error Monitoring:** Sentry
+- **Charts:** Recharts
 - **Deployment:** Vercel
 
 ---
@@ -124,6 +150,7 @@ npm run dev
 3. Add environment variables:
    NEXT_PUBLIC_SUPABASE_URL
    NEXT_PUBLIC_SUPABASE_ANON_KEY
+   SENTRY_AUTH_TOKEN
 4. Deploy — live URL generated automatically
 ```
 

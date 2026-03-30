@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Link from 'next/link';
 import Navbar from '@/components/ui/Navbar';
 import './globals.css';
 
@@ -31,7 +32,13 @@ export default function RootLayout({
         <main className="min-h-[calc(100vh-4rem)]">{children}</main>
         {/* Footer */}
         <footer className="border-t border-border py-8 text-center text-sm text-muted">
-          <p>© {new Date().getFullYear()} NihongoStudy — Built by Lorenzo Balitian</p>
+          <p>
+            © {new Date().getFullYear()} NihongoStudy — Built by Lorenzo Balitian
+            {' · '}
+            <Link href="/privacy" className="text-muted text-xs hover:text-primary transition-all">
+              Privacy Policy
+            </Link>
+          </p>
           <div className="mt-2">
             <a 
               href="https://ko-fi.com/kuwago" 

@@ -233,6 +233,10 @@ export default function Navbar() {
                   <Link href="/signup" className={cn('block', navLinkClass('/signup'))}>Sign up</Link>
                 </>
               )}
+              <div className="border-t border-border my-2" />
+              <Link href="/privacy" className="block px-3 py-2 text-xs text-muted hover:text-primary transition-colors">
+                Privacy Policy
+              </Link>
             </div>
           </div>
         )}

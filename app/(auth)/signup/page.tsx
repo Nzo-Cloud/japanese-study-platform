@@ -163,6 +163,13 @@ export default function SignupPage() {
           <Button type="submit" disabled={loading} className="w-full" size="lg">
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
+
+          <p className="text-xs text-muted text-center mt-3">
+            By signing up, you agree to our{' '}
+            <Link href="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </Link>
+          </p>
         </form>
 
         <p className="text-center text-sm text-muted mt-6">

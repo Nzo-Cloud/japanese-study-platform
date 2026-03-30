@@ -1,12 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+/* ── In-memory rate limiter ── */
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(ip: string, maxRequests = 30, windowMs = 60000): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+
+  if (record.count >= maxRequests) return false;
+
+  record.count++;
+  return true;
+}
+
 /**
  * GET /api/srs — Fetch SRS items for the authenticated user.
  *   Query params: ?due=true to filter for due items only.
  * POST /api/srs — Update SRS item state after review.
  */
 export async function GET(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') ??
+             request.headers.get('x-real-ip') ??
+             'anonymous';
+
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please slow down.' },
+      { status: 429 }
+    );
+  }
+
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -40,6 +69,17 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') ??
+             request.headers.get('x-real-ip') ??
+             'anonymous';
+
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please slow down.' },
+      { status: 429 }
+    );
+  }
+
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

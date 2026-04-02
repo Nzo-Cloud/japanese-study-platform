@@ -1,194 +1,163 @@
-import Link from 'next/link';
-import WhatsNewModal from '@/components/ui/WhatsNewModal';
-import SakuraPetals from '@/components/ui/SakuraPetals';
-import SakuraGrove from '@/components/ui/SakuraTree';
-import JapaneseCastle from '@/components/ui/JapaneseCastle';
-import HangingLantern from '@/components/ui/HangingLantern';
+'use client';
 
-/**
- * Landing page — hero section, feature highlights, and call to action.
- */
-export default function HomePage() {
-  const features = [
-    {
-      icon: 'あ',
-      title: 'Kana Mastery',
-      description: 'Learn all 46 hiragana and katakana with interactive charts and mini quizzes.',
-    },
-    {
-      icon: '漢',
-      title: 'Kanji Mastery',
-      description: 'N5–N3 kanji with readings, radicals, and example sentences.',
-    },
-    {
-      icon: '🔍',
-      title: 'Jisho Integration',
-      description: 'Deep-dive into any Kanji with direct links to Jisho.org for stroke orders and more.',
-    },
-    {
-      icon: '文',
-      title: 'Grammar Lessons',
-      description: '35+ grammar patterns from N5 to N3 with clear explanations.',
-    },
-    {
-      icon: '📝',
-      title: 'Smart Quizzes',
-      description: 'Randomized multiple-choice quizzes that adapt to your JLPT level.',
-    },
-    {
-      icon: '🧠',
-      title: 'SRS Review',
-      description: 'Spaced repetition system ensures you review items at the optimal time.',
-    },
-    {
-      icon: '💼',
-      title: 'Work Necessities',
-      description: 'Specialized vocabulary for the workplace: office supplies, electronics, and professional tools.',
-    },
-    {
-      icon: '📊',
-      title: 'Track Progress',
-      description: 'Dashboard with score history, study streaks, and category breakdowns.',
-    },
-  ];
+import dynamic from 'next/dynamic';
 
-  const levels = [
-    { level: 'N5', label: 'Beginner', desc: 'Basic vocabulary and simple sentences' },
-    { level: 'N4', label: 'Elementary', desc: 'Everyday conversations and basic reading' },
-    { level: 'N3', label: 'Intermediate', desc: 'Robust natural speech support — Now Fully Live!' },
-  ];
+const JourneyScene = dynamic(() => import('@/components/three/JourneyScene'), { ssr: false });
 
+const cardBase: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(201,168,76,0.15)',
+  borderRadius: '20px',
+  padding: '36px 28px',
+  textAlign: 'center',
+  transition: 'border-color 0.2s',
+};
+
+export default function Home() {
   return (
-    <div className="relative overflow-hidden bg-background">
-      <WhatsNewModal />
-      <SakuraPetals />
+    <main style={{ background: '#0a0815', color: '#f5efe6' }}>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        {/* Lantern Glow Pulse */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-[600px] bg-[radial-gradient(circle,rgba(212,175,55,0.15)_0%,rgba(26,26,27,0)_70%)] animate-glow-pulse pointer-events-none z-0" />
+      {/* 3D Hero Journey */}
+      <JourneyScene />
 
-        <HangingLantern className="left-8 top-0" />
-        <HangingLantern className="right-8 top-0" style={{ animationDelay: '1s' }} />
+      {/* ── SECTIONS ── */}
+      <div style={{ position: 'relative', zIndex: 10, background: '#0a0815' }}>
 
-        <JapaneseCastle />
-        <SakuraGrove />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="text-left max-w-2xl animate-shadow-fade">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-primary/20">
-                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                v1.5 Live — Study Arsenal Update
-              </div>
-
-              <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-8 font-serif leading-tight text-foreground drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
-                Master <span className="text-primary font-jp">日本語</span>
-                <br />
-                <span className="text-foreground/80 italic font-medium">With Elegance</span>
-              </h1>
-
-              <p className="text-lg sm:text-xl text-muted font-normal tracking-wide max-w-xl mb-12 leading-relaxed">
-                Step into a high-end self-study platform.
-                Experience Japanese mastery through the lens of Kyoto&apos;s timeless nighttime beauty.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-5">
-                <Link
-                  href="/signup"
-                  className="px-10 py-4 bg-accent text-white font-semibold rounded-xl hover:brightness-110 hover:shadow-[0_0_20px_rgba(212,175,55,0.6)] transition-all shadow-lg shadow-accent/20 hover:scale-105 text-center"
-                >
-                  Join the Journey
-                </Link>
-                <Link
-                  href="/study/hiragana"
-                  className="px-10 py-4 bg-secondary text-foreground font-semibold rounded-xl border border-border hover:border-primary/40 hover:shadow-md transition-all text-center"
-                >
-                  Explore Lessons
-                </Link>
-              </div>
-            </div>
-
-            {/* Vertical Accent Text - Shifted right and layered */}
-            <div className="hidden lg:block animate-shadow-fade relative z-[15] translate-x-12" style={{ animationDelay: '0.4s' }}>
-              <div className="writing-vertical text-6xl font-serif text-primary/30 select-none animate-pulse drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
-                努力は裏切らない
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="text-center mb-20 animate-shadow-fade">
-          <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6 text-foreground">Moonlit Mastery</h2>
-          <p className="text-muted max-w-2xl mx-auto text-lg leading-relaxed">
-            Beautifully designed tools for the serious learner, refined under the Kyoto moon.
+        {/* ── WHY LEARN JAPANESE ── */}
+        <section style={{ maxWidth: '1100px', margin: '0 auto', padding: '120px 32px 80px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: "'Noto Serif JP', serif", color: '#c9a84c', marginBottom: '12px', letterSpacing: '0.05em' }}>
+            Why Learn Japanese?
+          </h2>
+          <p style={{ color: '#a89880', fontSize: '1.05rem', maxWidth: '520px', margin: '0 auto 56px', lineHeight: 1.7 }}>
+            One language opens a door. Japanese opens an entire world.
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, i) => (
-            <div
-              key={i}
-              className="group bg-surface/40 backdrop-blur-sm rounded-2xl border border-border p-8 hover:border-primary/40 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 animate-shadow-fade"
-              style={{ animationDelay: `${0.1 * i + 0.5}s` }}
-            >
-              <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-primary/10 transition-colors font-jp border border-primary/20 text-primary">
-                {feature.icon}
-              </div>
-              <h3 className="font-bold text-xl mb-3 font-serif text-foreground">{feature.title}</h3>
-              <p className="text-base text-muted leading-relaxed font-sans">{feature.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* JLPT Levels */}
-      <section className="relative z-10 bg-primary/[0.02] py-24 border-y border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 animate-shadow-fade">
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4 text-foreground">Select Your Path</h2>
-            <p className="text-muted text-lg">Curated progression for the modern samurai of language.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {levels.map((l, i) => (
-              <div
-                key={l.level}
-                className="bg-surface rounded-2xl border border-border p-10 text-center hover:border-primary/40 hover:shadow-xl hover:scale-105 transition-all duration-500 animate-shadow-fade"
-                style={{ animationDelay: `${0.2 * i + 0.8}s` }}
-              >
-                <div className="text-5xl font-bold text-primary mb-4 font-serif text-shadow-sm">{l.level}</div>
-                <div className="text-xl font-bold mb-3 text-foreground/90">{l.label}</div>
-                <p className="text-muted leading-relaxed">{l.desc}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
+            {[
+              { icon: '✈️', title: 'Travel Local', desc: 'Navigate trains, menus, and shrines the way locals do — no translation app needed.' },
+              { icon: '💼', title: 'Work in Japan', desc: 'JLPT N4 is required for most work visas. N2 opens corporate doors.' },
+              { icon: '🎌', title: 'Culture', desc: 'Manga, anime, film, literature — all without subtitles or barriers.' },
+              { icon: '🧠', title: 'Brain Training', desc: 'Learning kanji and grammar builds memory, focus, and cognitive flexibility.' },
+            ].map((card) => (
+              <div key={card.title} style={cardBase}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>{card.icon}</div>
+                <h3 style={{ fontFamily: "'Noto Serif JP', serif", color: '#e8d5a3', fontSize: '1.15rem', marginBottom: '10px' }}>{card.title}</h3>
+                <p style={{ color: '#7a6a5a', fontSize: '0.92rem', lineHeight: 1.65 }}>{card.desc}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="relative overflow-hidden bg-secondary border border-primary/20 rounded-[2.5rem] p-12 sm:p-20 text-center text-foreground shadow-2xl animate-shadow-fade">
-          {/* Night texture overlay */}
-          <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #D4AF37 1px, transparent 0)', backgroundSize: '48px 48px' }} />
-
-          <div className="relative z-10">
-            <h2 className="text-4xl sm:text-5xl font-bold font-serif mb-6 leading-tight text-foreground drop-shadow-md">Step Into the Moonlight</h2>
-            <p className="text-muted max-w-xl mx-auto mb-10 text-lg leading-relaxed">
-              Begin your descent into the depth of Japanese fluency today. Join our elite community.
-            </p>
-            <Link
-              href="/signup"
-              className="inline-block px-12 py-5 bg-primary text-background font-bold rounded-2xl hover:brightness-110 hover:scale-105 transition-all shadow-2xl shadow-primary/20 text-lg"
-            >
-              Start Learning Now →
-            </Link>
+        {/* ── JLPT LEVEL PATH ── */}
+        <section style={{ maxWidth: '1100px', margin: '0 auto', padding: '60px 32px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', fontFamily: "'Noto Serif JP', serif", color: '#c9a84c', marginBottom: '12px' }}>
+            Your JLPT Path
+          </h2>
+          <p style={{ color: '#a89880', fontSize: '1rem', maxWidth: '480px', margin: '0 auto 48px', lineHeight: 1.7 }}>
+            Start from zero. Go as far as you want. Every level is fully covered.
+          </p>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {[
+              { level: 'N5', label: 'Beginner', desc: 'Hiragana, katakana, 100 kanji, basic phrases.', color: '#4caf8c' },
+              { level: 'N4', label: 'Elementary', desc: '300 kanji, everyday conversation, visa-ready.', color: '#c9a84c' },
+              { level: 'N3', label: 'Intermediate', desc: '650 kanji, news headlines, complex grammar.', color: '#e07b4a' },
+              { level: 'N2', label: 'Advanced', desc: '1000 kanji, professional Japanese, near-fluent.', color: '#c05a8a' },
+              { level: 'N1', label: 'Mastery', desc: '2000+ kanji, native media, full fluency.', color: '#7a5ac9' },
+            ].map((n) => (
+              <div key={n.level} style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: `1px solid ${n.color}44`,
+                borderRadius: '16px',
+                padding: '28px 24px',
+                minWidth: '160px',
+                flex: '1 1 160px',
+                maxWidth: '200px',
+              }}>
+                <div style={{ fontSize: '2rem', fontWeight: 700, color: n.color, fontFamily: "'Noto Serif JP', serif", marginBottom: '6px' }}>{n.level}</div>
+                <div style={{ fontSize: '0.8rem', color: n.color, opacity: 0.8, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{n.label}</div>
+                <p style={{ fontSize: '0.85rem', color: '#7a6a5a', lineHeight: 1.55 }}>{n.desc}</p>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+
+        {/* ── FEATURES BENTO ── */}
+        <section style={{ maxWidth: '1100px', margin: '0 auto', padding: '60px 32px 80px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', fontFamily: "'Noto Serif JP', serif", color: '#c9a84c', marginBottom: '12px' }}>
+            Everything You Need to Pass <span style={{ color: '#e8d5a3' }}>JLPT</span>
+          </h2>
+          <p style={{ color: '#a89880', fontSize: '1rem', maxWidth: '480px', margin: '0 auto 48px', lineHeight: 1.7 }}>
+            One platform. All levels. Completely free.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+            {[
+              { icon: '📝', title: 'Smart Quizzes', desc: 'Adaptive questions that get harder as you improve. Targets your exact weak points every session.', tag: 'All levels' },
+              { icon: '🧠', title: 'Vocabulary SRS', desc: 'Spaced repetition flashcards that show you words right before you forget them. Science-backed.', tag: '6000+ words' },
+              { icon: '漢', title: 'Kanji Mastery', desc: 'Stroke order animations, ON/KUN readings, radicals, and compound words — N5 through N1.', tag: '2136 kanji' },
+              { icon: '🎯', title: 'Mock Exams', desc: 'Full timed JLPT simulations with section breakdowns and instant score reports.', tag: 'Realistic format' },
+              { icon: '📖', title: 'Grammar Library', desc: 'Every grammar pattern explained in plain English with real example sentences and audio.', tag: 'N5–N1' },
+              { icon: '📖', title: 'Grammar Library', desc: 'Every grammar pattern explained in plain English with real example sentences and audio.', tag: 'N5–N1' },
+              { icon: '🔊', title: 'Listening Practice', desc: 'Native speaker audio for every quiz, flashcard, and grammar example. Train your ear daily.', tag: 'Native audio' },
+            ].map((f, i) => (
+              <div key={`${f.title}-${i}`} style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(201,168,76,0.12)',
+                borderRadius: '18px',
+                padding: '36px 32px',
+                textAlign: 'left',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                <div style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '0.72rem', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.3)', borderRadius: '999px', padding: '3px 10px' }}>{f.tag}</div>
+                <div style={{ fontSize: '2.2rem', marginBottom: '14px' }}>{f.icon}</div>
+                <h3 style={{ fontFamily: "'Noto Serif JP', serif", color: '#e8d5a3', fontSize: '1.1rem', marginBottom: '8px' }}>{f.title}</h3>
+                <p style={{ color: '#7a6a5a', fontSize: '0.9rem', lineHeight: 1.65 }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── STATS BAR ── */}
+        <section style={{ background: 'rgba(201,168,76,0.06)', borderTop: '1px solid rgba(201,168,76,0.12)', borderBottom: '1px solid rgba(201,168,76,0.12)', padding: '48px 32px' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '32px', textAlign: 'center' }}>
+            {[
+              { value: '100%', label: 'Free Forever' },
+              { value: '6,000+', label: 'Vocabulary Words' },
+              { value: '2,136', label: 'Kanji Covered' },
+              { value: 'N5–N1', label: 'All JLPT Levels' },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div style={{ fontSize: '2.4rem', fontWeight: 700, color: '#c9a84c', fontFamily: "'Noto Serif JP', serif" }}>{stat.value}</div>
+                <div style={{ fontSize: '0.85rem', color: '#7a6a5a', marginTop: '6px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── FINAL CTA ── */}
+        <section style={{ textAlign: 'center', padding: '120px 32px 100px' }}>
+          <div style={{ fontFamily: "'Noto Serif JP', serif", fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', color: '#c9a84c', marginBottom: '12px', letterSpacing: '0.08em' }}>
+            「努力は裏切らない」
+          </div>
+          <p style={{ color: '#7a6a5a', fontSize: '1rem', fontStyle: 'italic', marginBottom: '48px' }}>
+            Hard work never betrays you.
+          </p>
+          <a href="/study" style={{
+            display: 'inline-block',
+            background: '#c9a84c',
+            color: '#0a0815',
+            fontFamily: "'Noto Serif JP', serif",
+            fontSize: '1.1rem',
+            fontWeight: 700,
+            padding: '18px 52px',
+            borderRadius: '999px',
+            textDecoration: 'none',
+            letterSpacing: '0.06em',
+          }}>
+            Begin Your Journey
+          </a>
+        </section>
+
+      </div>
+    </main>
   );
 }

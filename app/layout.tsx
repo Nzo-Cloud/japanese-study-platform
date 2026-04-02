@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Cormorant_Garamond, Noto_Serif_JP } from 'next/font/google';
 import Link from 'next/link';
 import Navbar from '@/components/ui/Navbar';
 import './globals.css';
@@ -12,6 +12,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '600', '700'],
+  variable: '--font-cormorant',
+});
+
+const notoSerifJP = Noto_Serif_JP({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-noto-serif-jp',
 });
 
 export const metadata: Metadata = {
@@ -27,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${notoSerifJP.variable} antialiased`} suppressHydrationWarning>
         <Navbar />
         <main className="min-h-[calc(100vh-4rem)]">{children}</main>
         {/* Footer */}

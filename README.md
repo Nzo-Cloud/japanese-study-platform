@@ -1,4 +1,4 @@
-# NihongoStudy 🎌 — Japanese Study Platform v1.5.1
+# NihongoStudy 🎌 — Japanese Study Platform v1.6
 
 > Learn Japanese at your own pace. Free, forever.
 
@@ -15,6 +15,20 @@ A full-stack Japanese self-study platform for learners preparing for JLPT N5–N
 🌐 **Live Demo:** [japanese-study-platform.vercel.app](https://japanese-study-platform.vercel.app)
 
 ---
+
+## What's New — v1.6 (April 2026)
+
+*   **Cinematic 3D Hero Journey** — A hardware-aware, high-performance scrollytelling engine built with **React Three Fiber** and **Three.js**. It features a 900vh camera journey from a serene mountain shrine to a neon-lit Tokyo nightscape.
+    *   **Dynamic Nature Systems**: Procedural Sakura trees with animated opacity and instanced grass fields with wind-swaying logic.
+    *   **Urban Nightscape**: A dense city sprawl with high-detail instanced building models, randomized window lighting, and an animated elevated train system.
+    *   **Atmospheric Atmospherics**: Real-time fog-lerping and sky scattering that transitions from deep midnight to a golden dawn sky.
+    *   **Post-processing**: Cinematic Bloom effect for neon/light glow and atmospheric immersion.
+
+*   **Hardware-Aware Performance** — Implemented a **Static/3D Toggle** with intelligent **hardware detection** (`navigator.hardwareConcurrency` and `navigator.deviceMemory`) to recommend the ideal experience for high-end or mobile devices.
+
+*   **Lush CSS Parallax Fallback** — A complete 7-layer CSS/SVG parallax alternative for the static hero view, featuring moonlit gradients, mountain silhouettes, and animated sakura petals for zero-WebGL environments.
+
+*   **Navigation & UX** — Integrated `framer-motion` cross-fades for seamless transitions between Static and 3D states, and restored the **What's New** modal to announce these world-class updates in-app.
 
 ## What's New — v1.5.1 (March 2026)
 
@@ -60,6 +74,7 @@ A full-stack Japanese self-study platform for learners preparing for JLPT N5–N
 
 ## Features
 
+- **Cinematic Scrollytelling** — Explore a 3D mountain-to-city journey as you scroll, built with R3F for a world-class first impression.
 - **Kana Mastery** — Interactive hiragana & katakana charts with unified Basic/Dakuten views and per-tab mini quizzes.
 - **Kanji Study** — Comprehensive list (N5–N3) with readings, meanings, radicals, and "View on Jisho" integration.
 - **Grammar Lessons** — 35+ patterns (N5–N3) with furigana-annotated example sentences.
@@ -99,6 +114,8 @@ NihongoStudy takes user data seriously. Key measures in place:
 ## Tech Stack
 
 - **Frontend:** Next.js 16.2.1 (App Router, Turbopack), React, TypeScript, TailwindCSS
+- **3D Engine:** Three.js, @react-three/fiber, @react-three/drei, @react-three/postprocessing
+- **Motion:** Framer Motion
 - **Backend:** Next.js API Routes
 - **Database + Auth:** Supabase (PostgreSQL + Supabase Auth)
 - **Error Monitoring:** Sentry
@@ -167,10 +184,11 @@ npm run dev
 │   ├── quiz/               # Smart quiz
 │   └── study/              # Hiragana, Katakana, Kanji, Grammar, Categories
 ├── components/
+│   ├── three/              # Cinematic R3F Components (CameraRig, JourneyScene, etc.)
 │   ├── dashboard/          # StatsCard, ProgressChart
 │   ├── quiz/               # QuizEngine, QuizQuestion, QuizResults
 │   ├── study/              # KanaChart, KanjiCard, GrammarCard
-│   └── ui/                 # Navbar, Button, Card, Modal, WhatsNewModal
+│   └── ui/                 # Navbar, Button, StaticHero, HeroToggle, WhatsNewModal
 ├── data/                   # Static datasets (kanji, grammar, categories)
 ├── lib/                    # Supabase client, quiz generator, SRS engine
 ├── supabase/migrations/    # Database SQL

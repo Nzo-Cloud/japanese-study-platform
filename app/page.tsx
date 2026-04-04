@@ -1,6 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
+import { useScroll, useSpring, AnimatePresence, motion } from 'framer-motion';
+import StaticHero from '@/components/ui/StaticHero';
+import HeroToggle from '@/components/ui/HeroToggle';
+import WhatsNewModal from '@/components/ui/WhatsNewModal';
 
 const JourneyScene = dynamic(() => import('@/components/three/JourneyScene'), { ssr: false });
 
@@ -14,11 +19,45 @@ const cardBase: React.CSSProperties = {
 };
 
 export default function Home() {
+  const [is3D, setIs3D] = useState(false);
+  
+  // Scoped scroll tracking (shared between static and 3D)
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
   return (
     <main style={{ background: '#0a0815', color: '#f5efe6' }}>
+      <HeroToggle is3D={is3D} onToggle={setIs3D} />
+      <WhatsNewModal />
 
-      {/* 3D Hero Journey */}
-      <JourneyScene />
+      {/* 3D Hero Journey vs Static Hero Switcher */}
+      <AnimatePresence mode="wait">
+        {is3D ? (
+          <motion.div
+            key="3d-hero"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <JourneyScene />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="static-hero"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <StaticHero progress={progress} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── SECTIONS ── */}
       <div style={{ position: 'relative', zIndex: 10, background: '#0a0815' }}>

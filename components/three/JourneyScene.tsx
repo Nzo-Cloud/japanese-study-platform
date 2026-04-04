@@ -5,6 +5,7 @@ import { Html } from '@react-three/drei';
 import { useScroll, useSpring } from 'framer-motion';
 import { Suspense, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import CameraRig from './CameraRig';
 import ToriiGate from './ToriiGate';
 import Environment from './Environment';
@@ -59,7 +60,7 @@ export default function JourneyScene() {
   }
 
   return (
-    <div ref={containerRef} style={{ height: '700vh', background: '#0a0815' }}>
+    <div ref={containerRef} style={{ height: '900vh', background: '#0a0815' }}>
       <div style={{
         position: 'sticky', top: 0,
         height: '100vh', overflow: 'hidden'
@@ -71,12 +72,12 @@ export default function JourneyScene() {
           style={{ position: 'absolute', inset: 0 }}
           shadows
           gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
-          dpr={[1, 2]}
+          dpr={[1, 1.5]}
           frameloop="always" // Can change to "demand" later if performance is heavily constrained and no ongoing animations exist
         >
           <Suspense fallback={<Html center><LoadingScreen /></Html>}>
             {/* Ambient — soft, color-matched to sky */}
-            <ambientLight color="#b8c4d4" intensity={0.4} />
+            <ambientLight color="#5a4a60" intensity={0.2} />
 
             {/* Moon — for shrine night scene */}
             <pointLight position={[10, 20, -5]} color="#c8d8f0" intensity={2.5} distance={80} />
@@ -93,6 +94,16 @@ export default function JourneyScene() {
             <ToriiGate />
             <Particles progress={smoothProgress} />
             <ContentOverlays progress={smoothProgress} />
+
+            <EffectComposer>
+              <Bloom
+                intensity={0.3}
+                luminanceThreshold={0.75}
+                luminanceSmoothing={0.9}
+                mipmapBlur={true}
+                radius={0.4}
+              />
+            </EffectComposer>
           </Suspense>
         </Canvas>
 

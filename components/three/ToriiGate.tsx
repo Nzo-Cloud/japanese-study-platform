@@ -4,20 +4,20 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 
 export default function ToriiGate() {
-  const redMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
-    color: '#c41e3a',
-    roughness: 0.6,
+  const redMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#cc2c14',
+    roughness: 0.5,
     metalness: 0.0,
-    emissive: new THREE.Color('#3d0010'),
-    emissiveIntensity: 0.3
+    emissive: new THREE.Color('#6a1006'),
+    emissiveIntensity: 0.5
   }), []);
 
-  const darkRedMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
-    color: '#901020', // slightly darker for the top
-    roughness: 0.6,
+  const darkRedMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#b02010',
+    roughness: 0.5,
     metalness: 0.0,
-    emissive: new THREE.Color('#3d0010'),
-    emissiveIntensity: 0.3
+    emissive: new THREE.Color('#5a0c04'),
+    emissiveIntensity: 0.5
   }), []);
 
   const stoneBaseMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 

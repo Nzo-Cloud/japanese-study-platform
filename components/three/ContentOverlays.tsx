@@ -32,12 +32,12 @@ export default function ContentOverlays({ progress }: Props) {
   return (
     <group>
       {/* PANEL 1A — HERO (progress 0 -> 0.12) */}
-      <Html position={[0, 2, 15]} center style={{ opacity: getOpacity(p, 0, 0.12, false), transition: 'opacity 0.2s', pointerEvents: getOpacity(p, 0, 0.12, false) > 0.5 ? 'auto' : 'none' }}>
+      <Html position={[0, 2, 15]} center style={{ opacity: getOpacity(p, 0, 0.25, false), transition: 'opacity 0.2s', pointerEvents: getOpacity(p, 0, 0.25, false) > 0.5 ? 'auto' : 'none' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '1200px' }}>
           <h1 style={{ fontFamily: 'var(--font-cormorant)', fontSize: '2.5rem', fontWeight: 300, letterSpacing: '16px', textTransform: 'uppercase', margin: '0 0 -10px 0', color: '#f5efe6', textShadow: '0 4px 20px rgba(0,0,0,1), 0 0 40px rgba(0,0,0,0.8)' }}>
             Master Japanese
           </h1>
-          <div style={{ fontFamily: 'var(--font-noto-serif-jp)', fontSize: '15rem', fontWeight: 400, color: '#cca24c', lineHeight: 1.1, textShadow: '0 12px 50px rgba(0,0,0,0.9), 0 0 100px rgba(201,168,76,0.6)' }}>
+          <div style={{ fontFamily: 'var(--font-noto-serif-jp)', fontSize: '9rem', fontWeight: 400, color: '#cca24c', lineHeight: 1.1, textShadow: '0 12px 50px rgba(0,0,0,0.9), 0 0 100px rgba(201,168,76,0.6)' }}>
             日本語
           </div>
           <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '2rem', fontStyle: 'italic', color: '#c8bfb0', margin: '0 0 32px', letterSpacing: '3px', textShadow: '0 2px 12px rgba(0,0,0,1)' }}>
@@ -54,9 +54,9 @@ export default function ContentOverlays({ progress }: Props) {
 
       {/* PANEL 3 — CITY (progress 0.35 -> 0.55) */}
       <Html position={[0, 5, -45]} center style={{
-        opacity: getOpacity(p, 0.35, 0.55),
+        opacity: getOpacity(p, 0.25, 0.50),
         transition: 'opacity 0.3s',
-        pointerEvents: getOpacity(p, 0.35, 0.55) > 0.5 ? 'auto' : 'none'
+        pointerEvents: getOpacity(p, 0.25, 0.50) > 0.5 ? 'auto' : 'none'
       }}>
         <div style={{
           textAlign: 'center',
@@ -83,9 +83,9 @@ export default function ContentOverlays({ progress }: Props) {
         </div>
       </Html>
 
-      {/* PANEL 4 — FUJI (progress 0.55 -> 0.72) */}
+      {/* PANEL 4 — FUJI (progress 0.50 -> 0.80) */}
       <Html position={[0, 8, -50]} center style={{
-        opacity: getOpacity(p, 0.55, 0.72),
+        opacity: getOpacity(p, 0.50, 0.80),
         transition: 'opacity 0.3s',
         pointerEvents: 'none',
       }}>
@@ -110,6 +110,7 @@ export default function ContentOverlays({ progress }: Props) {
           }}>The peak of your journey.</p>
         </div>
       </Html>
+
     </group>
   );
 }

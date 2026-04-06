@@ -38,10 +38,10 @@ export default function JourneyScene() {
     stiffness: 80, damping: 25
   });
 
-  const exitFade       = useTransform(smoothProgress, [0.78, 0.88], [0, 1]);
-  const ctaOpacity     = useTransform(smoothProgress, [0.72, 0.77], [0, 1]);
+  const exitFade       = useTransform(smoothProgress, [0.87, 0.97], [0, 1]);
+  const ctaOpacity     = useTransform(smoothProgress, [0.80, 0.85], [0, 1]);
   const scrollHintOpacity = useTransform(smoothProgress, [0, 0.06], [1, 0]);
-  const chapterOpacity = useTransform(smoothProgress, [0.69, 0.75], [1, 0]);
+  const chapterOpacity = useTransform(smoothProgress, [0.87, 0.94], [1, 0]);
 
   const [ctaActive, setCtaActive] = useState(false);
   const [chapterIdx, setChapterIdx] = useState(0);
@@ -52,8 +52,8 @@ export default function JourneyScene() {
 
   useEffect(() => {
     return smoothProgress.on('change', (v) => {
-      if (v < 0.35) setChapterIdx(0);
-      else if (v < 0.69) setChapterIdx(1);
+      if (v < 0.25) setChapterIdx(0);
+      else if (v < 0.50) setChapterIdx(1);
       else setChapterIdx(2);
     });
   }, [smoothProgress]);
@@ -98,8 +98,8 @@ export default function JourneyScene() {
           frameloop="always" // Can change to "demand" later if performance is heavily constrained and no ongoing animations exist
         >
           <Suspense fallback={<Html center><LoadingScreen /></Html>}>
-            {/* Ambient — soft warm fill, Ghibli night */}
-            <ambientLight color="#f0e6d2" intensity={0.55} />
+            {/* Ambient — warm golden fill lifted for dusk mood */}
+            <ambientLight color="#ffd090" intensity={0.85} />
 
             {/* Scene Elements */}
             <CameraRig progress={smoothProgress} />
@@ -175,47 +175,6 @@ export default function JourneyScene() {
         </motion.div>
 
         {/* Final CTA overlay */}
-        <motion.div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          zIndex: 12, opacity: ctaOpacity,
-          pointerEvents: ctaActive ? 'auto' : 'none',
-          textAlign: 'center',
-        }}>
-          <p style={{
-            fontFamily: 'var(--font-cormorant)',
-            fontSize: 'clamp(1rem, 2vw, 1.4rem)',
-            letterSpacing: '8px',
-            textTransform: 'uppercase',
-            color: 'rgba(245,239,230,0.7)',
-            margin: '0 0 12px',
-          }}>Your journey awaits</p>
-          <div style={{
-            fontFamily: 'var(--font-noto-serif-jp)',
-            fontSize: 'clamp(3rem, 7vw, 6rem)',
-            color: '#c9a84c',
-            lineHeight: 1,
-            textShadow: '0 0 60px rgba(201,168,76,0.5)',
-            marginBottom: '32px',
-          }}>始めよう</div>
-          <a href="/signup" style={{
-            display: 'inline-block',
-            padding: '16px 48px',
-            border: '1.5px solid rgba(201,168,76,0.75)',
-            borderRadius: '999px',
-            color: '#e8d5a3',
-            fontFamily: 'var(--font-cormorant)',
-            fontSize: '1rem',
-            fontWeight: 600,
-            letterSpacing: '4px',
-            textTransform: 'uppercase',
-            textDecoration: 'none',
-            background: 'rgba(201,168,76,0.09)',
-            backdropFilter: 'blur(6px)',
-            cursor: 'pointer',
-          }}>Start Learning for Free</a>
-        </motion.div>
 
         {/* Exit fade to black */}
         <motion.div style={{

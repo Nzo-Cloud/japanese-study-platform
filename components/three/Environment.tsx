@@ -306,13 +306,13 @@ function CityBackground() {
   return (
     <group>
       {/* Building bodies — 120 instances, 1 draw call */}
-      <instancedMesh ref={bodyRef} args={[undefined, undefined, buildings.length]}>
+      <instancedMesh ref={bodyRef} args={[undefined, undefined, buildings.length]} frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="#3d3d52" roughness={0.95} fog={false} />
       </instancedMesh>
 
       {/* Window strips — ~600 instances, 1 draw call */}
-      <instancedMesh ref={winRef} args={[undefined, undefined, strips.length]}>
+      <instancedMesh ref={winRef} args={[undefined, undefined, strips.length]} frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshBasicMaterial color="#ffe090" toneMapped={false} fog={false} />
       </instancedMesh>

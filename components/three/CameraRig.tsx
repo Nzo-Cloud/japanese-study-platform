@@ -2,7 +2,7 @@
 
 import { useFrame } from '@react-three/fiber';
 import { MotionValue } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
 interface Props {
@@ -18,16 +18,32 @@ const CAMERA_KEYFRAMES = [
   { position: [0, 4, 0], target: [0, 4, -5], scroll: 0.30 },
   // Chapter 3: forest path (scroll 0.45)
   { position: [0, 5, -15], target: [0, 5, -25], scroll: 0.45 },
-  // Chapter 4: mountain viewpoint looking down at city (scroll 0.65)
-  { position: [0, 30, -20], target: [0, 0, -40], scroll: 0.65 },
+  // Chapter 4: street-level city view (scroll 0.65)
+  { position: [0, 4, -17], target: [0, 4, -55], scroll: 0.65 },
   // Chapter 5: facing Mount Fuji (scroll 1.0)
-  { position: [0, 15, -30], target: [0, 10, -80], scroll: 1.0 },
+  { position: [0, 8, -18], target: [0, 4, -65], scroll: 1.0 },
 ];
 
 export default function CameraRig({ progress }: Props) {
   const currentPos = useRef(new THREE.Vector3()).current;
   const currentTarget = useRef(new THREE.Vector3()).current;
   const smoothedLookAt = useRef(new THREE.Vector3(0, 3, 0)).current;
+  const finalLookAt = useRef(new THREE.Vector3()).current;
+
+  // Mouse parallax
+  const mouseTarget = useRef(new THREE.Vector2(0, 0)).current;
+  const mouseSmooth = useRef(new THREE.Vector2(0, 0)).current;
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      mouseTarget.set(
+        (e.clientX / window.innerWidth - 0.5) * 2,
+        -(e.clientY / window.innerHeight - 0.5) * 2
+      );
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    return () => window.removeEventListener('mousemove', onMouseMove);
+  }, [mouseTarget]);
 
   // Persistent refs for lerp calculations to avoid GC thrashing
   const startP = useRef(new THREE.Vector3());
@@ -68,7 +84,13 @@ export default function CameraRig({ progress }: Props) {
     // Smooth movement heavily using a slow lerp tracking the target points
     state.camera.position.lerp(currentPos, 0.05);
     smoothedLookAt.lerp(currentTarget, 0.05);
-    state.camera.lookAt(smoothedLookAt);
+
+    // Mouse parallax — offset the look-at target slightly
+    mouseSmooth.lerp(mouseTarget, 0.04);
+    finalLookAt.copy(smoothedLookAt);
+    finalLookAt.x += mouseSmooth.x * 2.5;
+    finalLookAt.y += mouseSmooth.y * 1.2;
+    state.camera.lookAt(finalLookAt);
   });
 
   return null;

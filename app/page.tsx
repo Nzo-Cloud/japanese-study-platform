@@ -20,7 +20,7 @@ const cardBase: React.CSSProperties = {
 
 export default function Home() {
   const [is3D, setIs3D] = useState(false);
-  
+
   // Scoped scroll tracking (shared between static and 3D)
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, {
@@ -133,7 +133,6 @@ export default function Home() {
               { icon: '🧠', title: 'Vocabulary SRS', desc: 'Spaced repetition flashcards that show you words right before you forget them. Science-backed.', tag: '6000+ words' },
               { icon: '漢', title: 'Kanji Mastery', desc: 'Stroke order animations, ON/KUN readings, radicals, and compound words — N5 through N1.', tag: '2136 kanji' },
               { icon: '🎯', title: 'Mock Exams', desc: 'Full timed JLPT simulations with section breakdowns and instant score reports.', tag: 'Realistic format' },
-              { icon: '📖', title: 'Grammar Library', desc: 'Every grammar pattern explained in plain English with real example sentences and audio.', tag: 'N5–N1' },
               { icon: '📖', title: 'Grammar Library', desc: 'Every grammar pattern explained in plain English with real example sentences and audio.', tag: 'N5–N1' },
               { icon: '🔊', title: 'Listening Practice', desc: 'Native speaker audio for every quiz, flashcard, and grammar example. Train your ear daily.', tag: 'Native audio' },
             ].map((f, i) => (

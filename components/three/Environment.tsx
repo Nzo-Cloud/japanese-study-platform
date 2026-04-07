@@ -428,6 +428,10 @@ function CityBackground() {
   const capRef  = useRef<THREE.InstancedMesh>(null);
   const { buildings, windows, roofDetails } = CITY_DATA;
 
+  // Flicker state — ~15% of windows randomly blink on/off
+  const flickerDummy  = useRef(new THREE.Object3D()).current;
+  const flickerWins   = useRef<{ idx: number; nextFlip: number; on: boolean }[]>([]);
+
   useEffect(() => {
     if (!bodyRef.current || !winRef.current || !capRef.current) return;
     const dummy = new THREE.Object3D();
@@ -455,7 +459,31 @@ function CityBackground() {
       capRef.current!.setMatrixAt(i, dummy.matrix);
     });
     capRef.current.instanceMatrix.needsUpdate = true;
+
+    // Pick flickerable windows after initial setup
+    flickerWins.current = windows
+      .map((_, i) => i)
+      .filter(() => Math.random() < 0.15)
+      .map(idx => ({ idx, nextFlip: Math.random() * 8, on: true }));
   }, [buildings, windows, roofDetails]);
+
+  useFrame(({ clock }) => {
+    if (!winRef.current || flickerWins.current.length === 0) return;
+    const t = clock.elapsedTime;
+    let dirty = false;
+    flickerWins.current.forEach(f => {
+      if (t < f.nextFlip) return;
+      f.on = !f.on;
+      f.nextFlip = t + 2 + Math.random() * 10;
+      const w = windows[f.idx];
+      flickerDummy.position.set(w.x, w.y, w.z);
+      flickerDummy.scale.set(w.ww, f.on ? 0.28 : 0, 0.05);
+      flickerDummy.updateMatrix();
+      winRef.current!.setMatrixAt(f.idx, flickerDummy.matrix);
+      dirty = true;
+    });
+    if (dirty) winRef.current.instanceMatrix.needsUpdate = true;
+  });
 
   return (
     <group>

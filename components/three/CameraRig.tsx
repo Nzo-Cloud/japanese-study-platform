@@ -81,6 +81,11 @@ export default function CameraRig({ progress }: Props) {
       currentTarget.lerpVectors(startT.current, endT.current, t);
     }
 
+    // Subtle breathing at rest — fades out as user scrolls
+    const breathStrength = Math.max(0, 1 - p / 0.08);
+    const breath = Math.sin(state.clock.elapsedTime * 0.35) * 0.05 * breathStrength;
+    currentPos.y += breath;
+
     // Smooth movement heavily using a slow lerp tracking the target points
     state.camera.position.lerp(currentPos, 0.05);
     smoothedLookAt.lerp(currentTarget, 0.05);

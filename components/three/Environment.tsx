@@ -301,6 +301,56 @@ function SakuraPetals() {
   );
 }
 
+// ── Bird silhouettes crossing the moon ────────────────────────────────────────
+function Birds() {
+  const bird1Ref = useRef<THREE.Mesh>(null);
+  const bird2Ref = useRef<THREE.Mesh>(null);
+
+  const birdShape = useMemo(() => {
+    const s = new THREE.Shape();
+    s.moveTo(-1.4, -0.1);
+    s.lineTo(-0.7,  0.3);
+    s.lineTo(-0.2,  0.05);
+    s.lineTo( 0,    0.15);
+    s.lineTo( 0.2,  0.05);
+    s.lineTo( 0.7,  0.3);
+    s.lineTo( 1.4, -0.1);
+    s.lineTo( 0.7, -0.15);
+    s.lineTo( 0,   -0.05);
+    s.lineTo(-0.7, -0.15);
+    s.closePath();
+    return s;
+  }, []);
+
+  // Moon sits at [20, 26, -18]. Birds cross left→right just in front (z = -16).
+  const PERIOD = 15, SPAN = 40;
+
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    if (bird1Ref.current) {
+      const phase = (t % PERIOD) / PERIOD;
+      bird1Ref.current.position.x = 20 - SPAN / 2 + phase * SPAN;
+    }
+    if (bird2Ref.current) {
+      const phase = ((t + 7) % PERIOD) / PERIOD;
+      bird2Ref.current.position.x = 20 - SPAN / 2 + phase * SPAN;
+    }
+  });
+
+  return (
+    <group>
+      <mesh ref={bird1Ref} position={[20, 27.2, -16]} scale={1.5}>
+        <shapeGeometry args={[birdShape]} />
+        <meshBasicMaterial color="#0a0510" transparent opacity={0.88} depthWrite={false} />
+      </mesh>
+      <mesh ref={bird2Ref} position={[20, 24.5, -16]} scale={1.1}>
+        <shapeGeometry args={[birdShape]} />
+        <meshBasicMaterial color="#0a0510" transparent opacity={0.82} depthWrite={false} />
+      </mesh>
+    </group>
+  );
+}
+
 // ── Flickering lantern light ───────────────────────────────────────────────────
 function FlickerLight({ position }: { position: [number, number, number] }) {
   const ref    = useRef<THREE.PointLight>(null);
@@ -622,6 +672,9 @@ export default function Environment({ progress }: Props) {
 
       {/* Moon + halo + moonlight */}
       <Moon />
+
+      {/* Bird silhouettes crossing the moon */}
+      <Birds />
 
       {/* Stars — upper hemisphere, seeded deterministic */}
       <Stars />

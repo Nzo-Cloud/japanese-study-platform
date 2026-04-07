@@ -1,5 +1,6 @@
 'use client';
 
+import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
 import * as THREE from 'three';
 
@@ -20,11 +21,18 @@ export default function ToriiGate() {
     emissiveIntensity: 0.5
   }), []);
 
-  const stoneBaseMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
+  const stoneBaseMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: '#8a7a6a',
     roughness: 0.95,
     metalness: 0.0
   }), []);
+
+  // Emissive pulse: breathe 0.4→0.6 over ~3s cycle
+  useFrame(({ clock }) => {
+    const intensity = 0.5 + Math.sin(clock.elapsedTime * (Math.PI * 2 / 3)) * 0.1;
+    redMaterial.emissiveIntensity = intensity;
+    darkRedMaterial.emissiveIntensity = intensity;
+  });
 
   // CatmullRomCurve3 for the shimenawa rope sagging
   const curve = useMemo(() => {

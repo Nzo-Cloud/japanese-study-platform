@@ -185,12 +185,98 @@ function GhibliPath() {
   );
 }
 
-// ── Cherry blossom tree (bright morning) ──────────────────────────────────────
+// ── Falling sakura petals ─────────────────────────────────────────────────────
+function SakuraPetals() {
+  const COUNT = 280;
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummy   = useRef(new THREE.Object3D()).current;
+
+  const petals = useRef(
+    Array.from({ length: COUNT }, () => ({
+      x:         (Math.random() - 0.5) * 28,
+      y:         Math.random() * 14 + 2,
+      z:         -2 - Math.random() * 32,
+      vy:        -(0.018 + Math.random() * 0.025),
+      vx:        (Math.random() - 0.5) * 0.008,
+      rotZ:      Math.random() * Math.PI * 2,
+      rotSpeed:  (Math.random() - 0.5) * 0.045,
+      swayOffset: Math.random() * Math.PI * 2,
+      swayAmp:   0.004 + Math.random() * 0.009,
+      swaySpeed: 0.35 + Math.random() * 0.65,
+      scale:     0.10 + Math.random() * 0.09,
+    }))
+  ).current;
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.elapsedTime;
+    petals.forEach((p, i) => {
+      p.y   += p.vy;
+      p.x   += p.vx + Math.sin(t * p.swaySpeed + p.swayOffset) * p.swayAmp;
+      p.rotZ += p.rotSpeed;
+      if (p.y < -1) {
+        p.y = 12 + Math.random() * 10;
+        p.x = (Math.random() - 0.5) * 28;
+        p.z = -2 - Math.random() * 32;
+      }
+      dummy.position.set(p.x, p.y, p.z);
+      dummy.rotation.set(Math.PI * 0.3, 0, p.rotZ);
+      dummy.scale.setScalar(p.scale);
+      dummy.updateMatrix();
+      meshRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, COUNT]} frustumCulled={false}>
+      <planeGeometry args={[1, 0.65]} />
+      <meshStandardMaterial
+        color="#f5a0c0"
+        emissive="#e06090"
+        emissiveIntensity={0.35}
+        transparent
+        opacity={0.82}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+      />
+    </instancedMesh>
+  );
+}
+
+// ── Flickering lantern light ───────────────────────────────────────────────────
+function FlickerLight({ position }: { position: [number, number, number] }) {
+  const ref    = useRef<THREE.PointLight>(null);
+  const offset = useMemo(() => Math.random() * 100, []);
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    const t = clock.elapsedTime + offset;
+    const flicker =
+      Math.sin(t * 7.3)  * 0.18 +
+      Math.sin(t * 13.7) * 0.10 +
+      Math.sin(t * 2.1)  * 0.06;
+    ref.current.intensity = 4.0 + flicker * 1.4;
+  });
+  return <pointLight ref={ref} position={position} color="#ff9020" intensity={4.0} distance={18} decay={2} />;
+}
+
+// ── Cherry blossom tree with canopy sway ──────────────────────────────────────
 function BlossomTree({ x, z, scale = 1 }: {
   x: number; z: number; scale?: number;
 }) {
+  const groupRef   = useRef<THREE.Group>(null);
+  const swayOffset = useMemo(() => Math.random() * Math.PI * 2, []);
+  const swaySpeed  = useMemo(() => 0.30 + Math.random() * 0.20, []);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.elapsedTime;
+    groupRef.current.rotation.z = Math.sin(t * swaySpeed + swayOffset) * 0.028;
+    groupRef.current.rotation.x = Math.sin(t * swaySpeed * 0.7 + swayOffset + 1) * 0.014;
+  });
+
   return (
-    <group position={[x, -0.5, z]} scale={[scale, scale, scale]}>
+    <group ref={groupRef} position={[x, -0.5, z]} scale={[scale, scale, scale]}>
       {/* Trunk — thick, dark brown */}
       <mesh position={[0, 2.5, 0]} castShadow>
         <cylinderGeometry args={[0.22, 0.32, 5.0, 6]} />
@@ -262,8 +348,8 @@ function StoneWayLanterns() {
             <boxGeometry args={[1.4, 0.18, 1.4]} />
             <meshStandardMaterial color="#585864" roughness={0.95} />
           </mesh>
-          {/* Warm amber point light — strong enough to pool on ground */}
-          <pointLight position={[0, 1.45, 0]} color="#ff9020" intensity={4.0} distance={18} decay={2} />
+          {/* Flickering amber flame light */}
+          <FlickerLight position={[0, 1.45, 0]} />
         </group>
       ))}
     </group>
@@ -463,6 +549,9 @@ export default function Environment({ progress }: Props) {
 
       {/* Ghibli stone path */}
       <GhibliPath />
+
+      {/* Falling sakura petals */}
+      <SakuraPetals />
 
       {/* Cherry blossom trees */}
       {trees.map((t, i) => (

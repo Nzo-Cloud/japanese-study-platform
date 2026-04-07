@@ -95,44 +95,6 @@ function Moon() {
   );
 }
 
-// ── Stars ─────────────────────────────────────────────────────────────────────
-function Stars() {
-  const positions = useMemo(() => {
-    const count = 1400;
-    const pos = new Float32Array(count * 3);
-    let s = 31337;
-    const rng = () => {
-      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
-      return s / 4294967296;
-    };
-    for (let i = 0; i < count; i++) {
-      const theta = rng() * Math.PI * 2;
-      // Bias toward upper sky — avoid the bright amber horizon band
-      const phi = Math.acos(1 - rng() * 0.72);
-      const r   = 130 + rng() * 40;
-      pos[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = r * Math.cos(phi) + 25; // keep well above horizon
-      pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
-    }
-    return pos;
-  }, []);
-
-  return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.45}
-        color="#ffffff"
-        transparent
-        opacity={0.95}
-        sizeAttenuation
-        depthWrite={false}
-      />
-    </points>
-  );
-}
 
 // ── Ground ─────────────────────────────────────────────────────────────────────
 function Ground() {
@@ -141,6 +103,101 @@ function Ground() {
       <planeGeometry args={[300, 160]} />
       <meshStandardMaterial color="#4db358" roughness={0.88} />
     </mesh>
+  );
+}
+
+// ── Ground mist wisps ─────────────────────────────────────────────────────────
+function MistWisps() {
+  const wisps = useRef(
+    Array.from({ length: 6 }, (_, i) => ({
+      x:      (Math.random() - 0.5) * 18,
+      z:      -4 - Math.random() * 22,
+      speed:  0.012 + Math.random() * 0.010,
+      offset: Math.random() * Math.PI * 2,
+      scale:  4 + Math.random() * 5,
+    }))
+  ).current;
+
+  const refs = useRef<(THREE.Mesh | null)[]>([]);
+
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    wisps.forEach((w, i) => {
+      const mesh = refs.current[i];
+      if (!mesh) return;
+      mesh.position.x = w.x + Math.sin(t * w.speed + w.offset) * 2.5;
+      mesh.material && ((mesh.material as THREE.MeshBasicMaterial).opacity =
+        0.06 + Math.sin(t * w.speed * 0.5 + w.offset) * 0.03);
+    });
+  });
+
+  return (
+    <group>
+      {wisps.map((w, i) => (
+        <mesh
+          key={i}
+          ref={el => { refs.current[i] = el; }}
+          position={[w.x, -0.35, w.z]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <planeGeometry args={[w.scale, w.scale * 0.4]} />
+          <meshBasicMaterial
+            color="#e8d8c0"
+            transparent
+            opacity={0.07}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// ── Twinkling stars ───────────────────────────────────────────────────────────
+function Stars() {
+  const COUNT = 1400;
+  const positions = useMemo(() => {
+    const pos = new Float32Array(COUNT * 3);
+    let s = 31337;
+    const rng = () => {
+      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+    for (let i = 0; i < COUNT; i++) {
+      const theta = rng() * Math.PI * 2;
+      const phi   = Math.acos(1 - rng() * 0.72);
+      const r     = 130 + rng() * 40;
+      pos[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+      pos[i * 3 + 1] = r * Math.cos(phi) + 25;
+      pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    return pos;
+  }, []);
+
+  const matRef = useRef<THREE.PointsMaterial>(null);
+  // We'll modulate the whole material opacity slightly — cheap global shimmer
+  useFrame(({ clock }) => {
+    if (!matRef.current) return;
+    const t = clock.elapsedTime;
+    matRef.current.opacity = 0.78 + Math.sin(t * 0.7) * 0.12 + Math.sin(t * 1.9) * 0.06;
+  });
+
+  return (
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        ref={matRef}
+        size={0.45}
+        color="#ffffff"
+        transparent
+        opacity={0.95}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
   );
 }
 
@@ -574,6 +631,9 @@ export default function Environment({ progress }: Props) {
 
       {/* Ground */}
       <Ground />
+
+      {/* Ground mist wisps */}
+      <MistWisps />
 
       {/* Ghibli stone path */}
       <GhibliPath />

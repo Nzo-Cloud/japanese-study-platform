@@ -2,7 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { useScroll, useSpring } from 'framer-motion';
+import { useScroll, useSpring, useTransform, motion } from 'framer-motion';
 import { Suspense, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -11,6 +11,8 @@ import ToriiGate from './ToriiGate';
 import Environment from './Environment';
 import Particles from './Particles';
 import ContentOverlays from './ContentOverlays';
+
+const CHAPTERS = ['01 · SHRINE', '02 · THE PATH', '03 · BEYOND'];
 
 // Fallback logic for when WebGL is not available/loading screen
 function LoadingScreen() {
@@ -36,6 +38,26 @@ export default function JourneyScene() {
     stiffness: 80, damping: 25
   });
 
+  const exitFade       = useTransform(smoothProgress, [0.87, 0.97], [0, 1]);
+  const ctaOpacity     = useTransform(smoothProgress, [0.80, 0.85], [0, 1]);
+  const scrollHintOpacity = useTransform(smoothProgress, [0, 0.06], [1, 0]);
+  const chapterOpacity = useTransform(smoothProgress, [0.87, 0.94], [1, 0]);
+
+  const [ctaActive, setCtaActive] = useState(false);
+  const [chapterIdx, setChapterIdx] = useState(0);
+
+  useEffect(() => {
+    return ctaOpacity.on('change', (v) => setCtaActive(v > 0.1));
+  }, [ctaOpacity]);
+
+  useEffect(() => {
+    return smoothProgress.on('change', (v) => {
+      if (v < 0.25) setChapterIdx(0);
+      else if (v < 0.50) setChapterIdx(1);
+      else setChapterIdx(2);
+    });
+  }, [smoothProgress]);
+
   const [hasWebGL, setHasWebGL] = useState<boolean>(true);
 
   // Very basic WebGL check
@@ -60,7 +82,7 @@ export default function JourneyScene() {
   }
 
   return (
-    <div ref={containerRef} style={{ height: '900vh', background: '#0a0815' }}>
+    <div ref={containerRef} style={{ height: '600vh', background: '#0a0815' }}>
       <div style={{
         position: 'sticky', top: 0,
         height: '100vh', overflow: 'hidden'
@@ -76,17 +98,8 @@ export default function JourneyScene() {
           frameloop="always" // Can change to "demand" later if performance is heavily constrained and no ongoing animations exist
         >
           <Suspense fallback={<Html center><LoadingScreen /></Html>}>
-            {/* Ambient — soft, color-matched to sky */}
-            <ambientLight color="#5a4a60" intensity={0.2} />
-
-            {/* Moon — for shrine night scene */}
-            <pointLight position={[10, 20, -5]} color="#c8d8f0" intensity={2.5} distance={80} />
-
-            {/* Torii warm accent — make the gate glow with shrine lantern warmth */}
-            <pointLight position={[0, 3, 2]} color="#ff6b35" intensity={1.2} distance={15} />
-
-            {/* Ground rim light — lifts the black floor */}
-            <pointLight position={[0, -1, 0]} color="#4a2060" intensity={0.8} distance={20} />
+            {/* Ambient — warm golden fill lifted for dusk mood */}
+            <ambientLight color="#ffd090" intensity={0.85} />
 
             {/* Scene Elements */}
             <CameraRig progress={smoothProgress} />
@@ -107,8 +120,8 @@ export default function JourneyScene() {
           </Suspense>
         </Canvas>
 
-        {/* Scroll hint */}
-        <div style={{
+        {/* Animated scroll hint */}
+        <motion.div style={{
           position: 'absolute',
           bottom: '32px',
           left: '50%',
@@ -119,15 +132,58 @@ export default function JourneyScene() {
           gap: '8px',
           zIndex: 20,
           pointerEvents: 'none',
-          opacity: 0.5,
+          opacity: scrollHintOpacity,
         }}>
-          <div style={{
-            width: '1px',
-            height: '48px',
-            background: 'linear-gradient(to bottom, transparent, #c9a84c)',
-            animation: 'pulse 2s infinite',
-          }} />
-        </div>
+          <div style={{ position: 'relative', width: '1px', height: '56px', background: 'rgba(201,168,76,0.25)' }}>
+            <motion.div
+              animate={{ y: [0, 56] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: 'linear' }}
+              style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '14px', background: '#c9a84c' }}
+            />
+          </div>
+        </motion.div>
+
+        {/* Chapter indicator — bottom left */}
+        <motion.div style={{
+          position: 'absolute',
+          bottom: '36px',
+          left: '36px',
+          zIndex: 20,
+          pointerEvents: 'none',
+          opacity: chapterOpacity,
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-start' }}>
+            {CHAPTERS.map((label, i) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <motion.div style={{
+                  width: i === chapterIdx ? 20 : 6,
+                  height: '2px',
+                  background: i === chapterIdx ? '#c9a84c' : 'rgba(201,168,76,0.35)',
+                  transition: 'all 0.5s ease',
+                }} />
+                <span style={{
+                  fontFamily: 'var(--font-cormorant)',
+                  fontSize: '0.72rem',
+                  letterSpacing: '3px',
+                  color: i === chapterIdx ? '#c9a84c' : 'rgba(201,168,76,0.4)',
+                  transition: 'color 0.5s ease',
+                  textTransform: 'uppercase',
+                }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Final CTA overlay */}
+
+        {/* Exit fade to black */}
+        <motion.div style={{
+          position: 'absolute', inset: 0,
+          background: '#000',
+          zIndex: 15,
+          opacity: exitFade,
+          pointerEvents: 'none',
+        }} />
 
         {/* Fade out to page below */}
         <div style={{

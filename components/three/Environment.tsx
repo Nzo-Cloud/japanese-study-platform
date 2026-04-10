@@ -1,4 +1,5 @@
-import { Sky } from '@react-three/drei';
+'use client';
+
 import { useFrame } from '@react-three/fiber';
 import { MotionValue } from 'framer-motion';
 import { useMemo, useRef, useEffect } from 'react';
@@ -8,913 +9,969 @@ interface Props {
   progress: MotionValue<number>;
 }
 
-// Cherry Blossom Tree logic
-function CherryBlossomTree({ position, opacity, scale = 1 }: {
-  position: [number, number, number],
-  opacity: number,
-  scale?: number
-}) {
-  if (opacity <= 0) return null;
+// ── Gradient Sky Dome ─────────────────────────────────────────────────────────
+function GradientSky() {
+  const vertexShader = /* glsl */`
+    varying vec3 vWorldPos;
+    void main() {
+      vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+  const fragmentShader = /* glsl */`
+    varying vec3 vWorldPos;
+    void main() {
+      float t = clamp(vWorldPos.y / 250.0, 0.0, 1.0);
+
+      vec3 horizon    = vec3(0.88, 0.50, 0.19);  // warm amber
+      vec3 warmPurple = vec3(0.55, 0.25, 0.28);  // pink-purple band
+      vec3 deepPurple = vec3(0.24, 0.13, 0.31);  // twilight purple
+      vec3 navyBlue   = vec3(0.11, 0.16, 0.35);  // mid navy
+      vec3 upperNavy  = vec3(0.06, 0.11, 0.26);  // upper navy
+      vec3 zenith     = vec3(0.03, 0.06, 0.16);  // deep night
+
+      vec3 color;
+      if (t < 0.08) {
+        color = mix(horizon, warmPurple, smoothstep(0.0, 1.0, t / 0.08));
+      } else if (t < 0.25) {
+        color = mix(warmPurple, deepPurple, smoothstep(0.0, 1.0, (t - 0.08) / 0.17));
+      } else if (t < 0.45) {
+        color = mix(deepPurple, navyBlue, smoothstep(0.0, 1.0, (t - 0.25) / 0.20));
+      } else if (t < 0.65) {
+        color = mix(navyBlue, upperNavy, smoothstep(0.0, 1.0, (t - 0.45) / 0.20));
+      } else {
+        color = mix(upperNavy, zenith, smoothstep(0.0, 1.0, (t - 0.65) / 0.35));
+      }
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
 
   return (
-    <group position={position} scale={[scale, scale, scale]}>
-      <mesh position={[0, 1.5, 0]}>
-        <cylinderGeometry args={[0.15, 0.2, 3]} />
-        <meshStandardMaterial color="#5c3d2e" roughness={0.9} transparent opacity={opacity} />
-      </mesh>
+    <mesh renderOrder={-1}>
+      <sphereGeometry args={[500, 32, 16]} />
+      <shaderMaterial
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        side={THREE.BackSide}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
 
-      {/* Canopy Spheres */}
-      <mesh position={[0, 3, 0]}>
-        <dodecahedronGeometry args={[1.8, 1]} />
-        <meshStandardMaterial color="#ffb7c5" emissive="#ff6b8a" emissiveIntensity={0.1} transparent opacity={opacity * 0.85} roughness={0.8} />
+// ── Moon ──────────────────────────────────────────────────────────────────────
+function Moon() {
+  return (
+    <group position={[20, 26, -18]}>
+      {/* Core — large, bright, strongly emissive */}
+      <mesh>
+        <sphereGeometry args={[5.5, 32, 32]} />
+        <meshStandardMaterial
+          color="#fffef0"
+          emissive="#ffffff"
+          emissiveIntensity={3.5}
+          roughness={0.2}
+        />
       </mesh>
-      <mesh position={[0.8, 2.5, 0]}>
-        <dodecahedronGeometry args={[1.5, 1]} />
-        <meshStandardMaterial color="#ffb7c5" emissive="#ff6b8a" emissiveIntensity={0.1} transparent opacity={opacity * 0.85} roughness={0.8} />
+      {/* Inner halo — tight glow */}
+      <mesh>
+        <sphereGeometry args={[8.0, 16, 16]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.10} side={THREE.BackSide} depthWrite={false} />
       </mesh>
-      <mesh position={[-0.8, 2.0, 0.5]}>
-        <dodecahedronGeometry args={[1.2, 1]} />
-        <meshStandardMaterial color="#ffb7c5" emissive="#ff6b8a" emissiveIntensity={0.1} transparent opacity={opacity * 0.85} roughness={0.8} />
+      {/* Mid halo */}
+      <mesh>
+        <sphereGeometry args={[13.0, 16, 16]} />
+        <meshBasicMaterial color="#e8f0ff" transparent opacity={0.05} side={THREE.BackSide} depthWrite={false} />
       </mesh>
+      {/* Wide diffuse halo */}
+      <mesh>
+        <sphereGeometry args={[22.0, 16, 16]} />
+        <meshBasicMaterial color="#d0e0ff" transparent opacity={0.02} side={THREE.BackSide} depthWrite={false} />
+      </mesh>
+      {/* Moonlight point */}
+      <pointLight color="#ddeeff" intensity={8.0} distance={280} decay={1.0} />
     </group>
   );
 }
 
-function GroundSystem() {
-  const stones = useMemo(() => {
-    const s = [];
-    for (let i = 0; i < 25; i++) {
-      s.push({
-        x: (Math.random() - 0.5) * 0.5,
-        z: -18 + (i * 1.8) + (Math.random() * 0.3),
-        rotY: (Math.random() - 0.5) * 0.3,
-        width: 2.0 + Math.random() * 0.8,
-        depth: 0.9 + Math.random() * 0.4
-      })
-    }
-    return s;
+
+// ── Ground ─────────────────────────────────────────────────────────────────────
+function Ground() {
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.52, -25]} receiveShadow>
+      <planeGeometry args={[300, 160]} />
+      <meshStandardMaterial color="#4db358" roughness={0.88} />
+    </mesh>
+  );
+}
+
+// ── Grass tufts flanking the stone path ────────────────────────────────────────
+function GrassTufts() {
+  const COUNT = 350;
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummy = useRef(new THREE.Object3D()).current;
+
+  // Seeded deterministic placement
+  const tufts = useMemo(() => {
+    let s = 42;
+    const rng = () => {
+      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+
+    return Array.from({ length: COUNT }, () => {
+      // Pick left or right band
+      const side = rng() < 0.5 ? -1 : 1;
+      const x = side * (5 + rng() * 13);   // ±5 to ±18
+      const z = -4 - rng() * 28;            // -4 to -32
+      const rotY = rng() * Math.PI * 2;
+      const tiltX = (rng() - 0.5) * 0.30;  // -0.15 to +0.15
+      const sc = 0.5 + rng() * 0.5;        // 0.5 to 1.0
+      return { x, z, rotY, tiltX, sc };
+    });
   }, []);
+
+  // Initial matrix setup
+  useEffect(() => {
+    if (!meshRef.current) return;
+    tufts.forEach((t, i) => {
+      dummy.position.set(t.x, -0.45, t.z);
+      dummy.rotation.set(t.tiltX, t.rotY, 0);
+      dummy.scale.setScalar(t.sc);
+      dummy.updateMatrix();
+      meshRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [tufts, dummy]);
+
+  // Gentle collective sway
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const sway = Math.sin(clock.elapsedTime * 0.8) * 0.04;
+    tufts.forEach((t, i) => {
+      dummy.position.set(t.x, -0.45, t.z);
+      dummy.rotation.set(t.tiltX + sway, t.rotY, 0);
+      dummy.scale.setScalar(t.sc);
+      dummy.updateMatrix();
+      meshRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, COUNT]} frustumCulled={false}>
+      <planeGeometry args={[0.25, 0.55]} />
+      <meshStandardMaterial
+        color="#5ac060"
+        emissive="#1a3a1a"
+        emissiveIntensity={0.12}
+        transparent
+        alphaTest={0.4}
+        side={THREE.DoubleSide}
+        depthWrite={true}
+      />
+    </instancedMesh>
+  );
+}
+
+// ── Fireflies — warm ambient particles above the ground ───────────────────────
+function Fireflies() {
+  const COUNT = 120;
+  const pointsRef = useRef<THREE.Points>(null);
+
+  // Seeded initial positions + per-particle animation params
+  const { initPositions, phases, speeds, flickerSpeeds } = useMemo(() => {
+    let s = 999;
+    const rng = () => {
+      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+
+    const init = new Float32Array(COUNT * 3);
+    const ph = new Float32Array(COUNT);
+    const sp = new Float32Array(COUNT);
+    const fl = new Float32Array(COUNT);
+
+    for (let i = 0; i < COUNT; i++) {
+      init[i * 3 + 0] = (rng() - 0.5) * 32;          // x: -16 to +16
+      init[i * 3 + 1] = 0.2 + rng() * 2.6;           // y: 0.2 to 2.8
+      init[i * 3 + 2] = 2 - rng() * 50;              // z: 2 to -48
+      ph[i] = rng() * Math.PI * 2;                    // phase: 0 to 2π
+      sp[i] = 0.4 + rng() * 0.5;                     // speed: 0.4 to 0.9
+      fl[i] = 1.5 + rng() * 2.5;                     // flickerSpeed: 1.5 to 4.0
+    }
+    return { initPositions: init, phases: ph, speeds: sp, flickerSpeeds: fl };
+  }, []);
+
+  // Live positions buffer
+  const positions = useRef(new Float32Array(COUNT * 3)).current;
+
+  // Copy initial positions into the live buffer
+  useEffect(() => {
+    positions.set(initPositions);
+  }, [initPositions, positions]);
+
+  useFrame(({ clock }) => {
+    if (!pointsRef.current) return;
+    const t = clock.elapsedTime;
+
+    for (let i = 0; i < COUNT; i++) {
+      const phase = phases[i];
+      const speed = speeds[i];
+      positions[i * 3 + 0] = initPositions[i * 3 + 0] + Math.sin(t * 0.15 + phase) * 0.4;
+      positions[i * 3 + 1] = initPositions[i * 3 + 1] + Math.sin(t * speed + phase) * 0.3;
+      // z stays at initial
+      positions[i * 3 + 2] = initPositions[i * 3 + 2];
+    }
+    pointsRef.current.geometry.attributes.position.needsUpdate = true;
+
+    // Global opacity flicker — average of all individual flickers
+    const mat = pointsRef.current.material as THREE.PointsMaterial;
+    const flicker = Math.sin(t * 2.2) * 0.5 + 0.5; // 0→1
+    mat.opacity = 0.4 + flicker * 0.55;             // 0.4→0.95
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        color="#ffe090"
+        size={0.18}
+        transparent
+        opacity={0.85}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+        sizeAttenuation
+      />
+    </points>
+  );
+}
+
+// ── Ground mist wisps ─────────────────────────────────────────────────────────
+function MistWisps() {
+  const wisps = useRef(
+    Array.from({ length: 6 }, (_, i) => ({
+      x:      (Math.random() - 0.5) * 18,
+      z:      -4 - Math.random() * 22,
+      speed:  0.012 + Math.random() * 0.010,
+      offset: Math.random() * Math.PI * 2,
+      scale:  4 + Math.random() * 5,
+    }))
+  ).current;
+
+  const refs = useRef<(THREE.Mesh | null)[]>([]);
+
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    wisps.forEach((w, i) => {
+      const mesh = refs.current[i];
+      if (!mesh) return;
+      mesh.position.x = w.x + Math.sin(t * w.speed + w.offset) * 2.5;
+      mesh.material && ((mesh.material as THREE.MeshBasicMaterial).opacity =
+        0.06 + Math.sin(t * w.speed * 0.5 + w.offset) * 0.03);
+    });
+  });
 
   return (
     <group>
-      {/* Matte Dark Moss Ground */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[5000, 5000]} />
-        <meshStandardMaterial color="#0a0d1a" roughness={1.0} />
-      </mesh>
-
-      {/* Ancient Chunked Flagstones */}
-      {stones.map((st, i) => (
-        <mesh key={i} position={[st.x, 0.05, st.z]} rotation={[-Math.PI / 2, 0, st.rotY]} receiveShadow castShadow>
-          <boxGeometry args={[st.width, st.depth, 0.2]} />
-          <meshStandardMaterial color="#353b47" roughness={0.9} />
+      {wisps.map((w, i) => (
+        <mesh
+          key={i}
+          ref={el => { refs.current[i] = el; }}
+          position={[w.x, -0.35, w.z]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <planeGeometry args={[w.scale, w.scale * 0.4]} />
+          <meshBasicMaterial
+            color="#e8d8c0"
+            transparent
+            opacity={0.07}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+          />
         </mesh>
       ))}
     </group>
   );
 }
 
-// ====== SCENE ENVIRONMENT DECORATIONS ======
-
-// 1. Swaying Wind-Grass (InstancedMesh)
-function GrassField() {
-  const count = 3000;
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-
-  // Each grass cluster has 3 blades rendered as a group
-  // We simulate this by creating 3 instanced meshes with slight offsets
-  const initialPositions = useMemo(() => {
-    const pos = [];
-    for (let i = 0; i < count; i++) {
-      let x = (Math.random() - 0.5) * 120;
-      if (x > -3.5 && x < 3.5) x = x > 0 ? x + 3.5 : x - 3.5;
-      const z = 20 - Math.random() * 40;
-      const scale = 0.4 + Math.random() * 0.8;
-      const rotation = Math.random() * Math.PI * 2;
-      const lean = (Math.random() - 0.5) * 0.4; // random lean angle
-      pos.push({ x, z, scale, rotation, lean });
+// ── Twinkling stars ───────────────────────────────────────────────────────────
+function Stars() {
+  const COUNT = 1400;
+  const positions = useMemo(() => {
+    const pos = new Float32Array(COUNT * 3);
+    let s = 31337;
+    const rng = () => {
+      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+    for (let i = 0; i < COUNT; i++) {
+      const theta = rng() * Math.PI * 2;
+      const phi   = Math.acos(1 - rng() * 0.72);
+      const r     = 130 + rng() * 40;
+      pos[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+      pos[i * 3 + 1] = r * Math.cos(phi) + 25;
+      pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
     }
     return pos;
-  }, [count]);
-
-  // Blade shape: use a custom rounded blade via CapsuleGeometry or 
-  // high-segment cone to get soft rounded tip instead of sharp triangle
-  // We'll render 3 layers: back blades (darker), front blades (lighter), 
-  // accent blades (pink-tinted for depth)
-
-  const blade1Ref = useRef<THREE.InstancedMesh>(null);
-  const blade2Ref = useRef<THREE.InstancedMesh>(null);
-  const blade3Ref = useRef<THREE.InstancedMesh>(null);
-
-  useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-
-    [blade1Ref, blade2Ref, blade3Ref].forEach((ref, layerIndex) => {
-      if (!ref.current) return;
-      initialPositions.forEach((p, i) => {
-        const windPhase = time * 0.6 + p.x * 0.15 + p.z * 0.08;
-        const swayX = Math.sin(windPhase) * 0.12;
-        const swayZ = Math.cos(windPhase * 0.7) * 0.08;
-
-        // Each layer offsets slightly for cluster feel
-        const offsetX = layerIndex === 0 ? -0.15 : layerIndex === 1 ? 0.15 : 0;
-        const offsetZ = layerIndex === 0 ? 0.1 : layerIndex === 1 ? -0.1 : 0.05;
-        const scaleY = layerIndex === 2 ? p.scale * 1.2 : p.scale;
-
-        dummy.position.set(
-          p.x + offsetX,
-          (scaleY * 0.55),
-          p.z + offsetZ
-        );
-        dummy.rotation.set(swayX + p.lean, p.rotation + layerIndex * 0.4, swayZ);
-        dummy.scale.set(p.scale * 0.18, scaleY * 0.9, p.scale * 0.18);
-        dummy.updateMatrix();
-        ref.current!.setMatrixAt(i, dummy.matrix);
-      });
-      ref.current.instanceMatrix.needsUpdate = true;
-    });
-  });
-
-  // Color layers: deep forest green base, mid green, and a lighter tip accent
-  return (
-    <group>
-      {/* Back layer — deep shadowed green */}
-      <instancedMesh ref={blade1Ref} args={[undefined, undefined, count]}>
-        <coneGeometry args={[0.5, 1.0, 8]} />
-        <meshStandardMaterial
-          color="#2d4a1e"
-          roughness={0.95}
-          metalness={0}
-        />
-      </instancedMesh>
-
-      {/* Mid layer — lush Ghibli green */}
-      <instancedMesh ref={blade2Ref} args={[undefined, undefined, count]}>
-        <coneGeometry args={[0.45, 1.0, 8]} />
-        <meshStandardMaterial
-          color="#3d6b2a"
-          roughness={0.9}
-          metalness={0}
-        />
-      </instancedMesh>
-
-      {/* Front accent layer — lighter, slight warm tint */}
-      <instancedMesh ref={blade3Ref} args={[undefined, undefined, count]}>
-        <coneGeometry args={[0.35, 1.0, 8]} />
-        <meshStandardMaterial
-          color="#4a7c35"
-          roughness={0.85}
-          metalness={0}
-          emissive="#1a3a0a"
-          emissiveIntensity={0.15}
-        />
-      </instancedMesh>
-    </group>
-  );
-}
-
-
-
-// 0. Sky Controller for high-performance ref updates
-function SkyController({ sunRef, rayleighRef, turbidityRef }: {
-  sunRef: React.MutableRefObject<THREE.Vector3>,
-  rayleighRef: React.MutableRefObject<number>,
-  turbidityRef: React.MutableRefObject<number>,
-}) {
-  const skyRef = useRef<any>(null);
-  useFrame(() => {
-    if (!skyRef.current) return;
-    const mat = skyRef.current.material;
-    if (!mat?.uniforms) return;
-    mat.uniforms.sunPosition.value.copy(sunRef.current);
-    mat.uniforms.rayleigh.value = rayleighRef.current;
-    mat.uniforms.turbidity.value = turbidityRef.current;
-  });
-  return (
-    <Sky
-      ref={skyRef}
-      mieCoefficient={0.005}
-      mieDirectionalG={0.8}
-    />
-  );
-}
-
-function ShibuyaCrossing() {
-  const groupRef = useRef<THREE.Group>(null);
-  const crossingZ = -22;
-  const crossingY = 0.1;
-
-  const stripes = useMemo(() => {
-    const s: { x: number, z: number, rotY: number, w: number, d: number }[] = [];
-    for (let i = -4; i <= 4; i++) s.push({ x: i * 1.2, z: crossingZ, rotY: 0, w: 0.5, d: 8 });
-    for (let i = -4; i <= 4; i++) s.push({ x: i * 1.2, z: crossingZ, rotY: Math.PI / 2, w: 0.5, d: 8 });
-    for (let i = -4; i <= 4; i++) s.push({ x: i * 1.2, z: crossingZ, rotY: Math.PI / 4, w: 0.4, d: 10 });
-    return s;
   }, []);
 
-  const figures = useMemo(() => {
-    const figs: { id: number, x: number, z: number, direction: number, speed: number, hasUmbrella: boolean, scale: number, phase: number }[] = [];
-    for (let i = 0; i < 60; i++) {
-      const direction = i % 4;
-      const spread = (Math.random() - 0.5) * 14;
-      const offset = (Math.random() - 0.5) * 6;
-      figs.push({
-        id: i,
-        x: direction === 0 || direction === 1 ? spread : offset,
-        z: crossingZ + (direction === 2 ? offset : (Math.random() - 0.5) * 8),
-        direction,
-        speed: 0.008 + Math.random() * 0.006,
-        hasUmbrella: Math.random() > 0.65,
-        scale: 1.8 + Math.random() * 0.8,
-        phase: Math.random() * Math.PI * 2,
-      });
-    }
-    return figs;
-  }, []);
-
-  useFrame((state) => {
-    if (!groupRef.current) return;
-    const time = state.clock.getElapsedTime();
-    const children = groupRef.current.children;
-    const figureStartIndex = 2;
-    figures.forEach((fig, i) => {
-      const child = children[figureStartIndex + i];
-      if (!child) return;
-      child.position.y = crossingY + Math.abs(Math.sin(time * 2.5 + fig.phase)) * 0.06;
-      switch (fig.direction) {
-        case 0: child.position.x -= fig.speed; if (child.position.x < -12) child.position.x = 12; break;
-        case 1: child.position.x += fig.speed; if (child.position.x > 12) child.position.x = -12; break;
-        case 2: child.position.z += fig.speed; if (child.position.z > crossingZ + 6) child.position.z = crossingZ - 6; break;
-        case 3: child.position.x += fig.speed * 0.7; child.position.z += fig.speed * 0.7;
-          if (child.position.x > 12) child.position.x = -12;
-          if (child.position.z > crossingZ + 6) child.position.z = crossingZ - 6; break;
-      }
-    });
+  const matRef = useRef<THREE.PointsMaterial>(null);
+  // We'll modulate the whole material opacity slightly — cheap global shimmer
+  useFrame(({ clock }) => {
+    if (!matRef.current) return;
+    const t = clock.elapsedTime;
+    matRef.current.opacity = 0.78 + Math.sin(t * 0.7) * 0.12 + Math.sin(t * 1.9) * 0.06;
   });
 
-  const c = "#1a0f20";
   return (
-    <group ref={groupRef}>
-      <group>
-        {stripes.map((stripe, i) => (
-          <mesh key={i} position={[stripe.x, crossingY + 0.02, stripe.z]} rotation={[Math.PI / 2, stripe.rotY, 0]}>
-            <planeGeometry args={[stripe.w, stripe.d]} />
-            <meshBasicMaterial color="#ffffff" transparent opacity={0.25} depthWrite={false} />
-          </mesh>
-        ))}
-      </group>
-      <pointLight position={[0, 4, crossingZ]} color="#ff9f1c" intensity={3.0} distance={40} />
-      {figures.map((fig) => (
-        <group key={fig.id} position={[fig.x, crossingY, fig.z]} scale={[fig.scale, fig.scale, fig.scale]}>
-          <mesh position={[0, 0.55, 0]}>
-            <capsuleGeometry args={[0.1, 0.6, 4, 6]} />
-            <meshBasicMaterial color={c} />
-          </mesh>
-          <mesh position={[0, 1.1, 0]}>
-            <sphereGeometry args={[0.13, 6, 6]} />
-            <meshBasicMaterial color={c} />
-          </mesh>
-          {fig.hasUmbrella && (
-            <group position={[0.1, 1.35, 0]}>
-              <mesh position={[0, -0.15, 0]}>
-                <cylinderGeometry args={[0.015, 0.015, 0.3, 5]} />
-                <meshBasicMaterial color={c} />
-              </mesh>
-              <mesh position={[0, 0, 0]} rotation={[0.1, 0, 0]}>
-                <coneGeometry args={[0.38, 0.15, 10]} />
-                <meshBasicMaterial color={c} />
-              </mesh>
-            </group>
-          )}
-        </group>
-      ))}
-    </group>
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        ref={matRef}
+        size={0.45}
+        color="#ffffff"
+        transparent
+        opacity={0.95}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
   );
 }
 
-function SkylineSilhouette() {
-  const shape = useMemo(() => {
-    const s = new THREE.Shape();
-    // Start bottom left
-    s.moveTo(-120, -8);
+// ── Ghibli stone path (irregular tiles, not straight) ─────────────────────────
+function GhibliPath() {
+  const tiles = useMemo(() => {
+    // Seeded RNG for deterministic variation
+    let s = 77;
+    const rng = () => {
+      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
 
-    // Build a varied skyline profile left to right
-    const points = [
-      [-120, -8], [-110, -8], [-110, 12], [-106, 12], [-106, 8],
-      [-102, 8], [-102, 22], [-99, 22], [-99, 8], [-96, 8],
-      [-96, 15], [-93, 15], [-93, 28], [-91, 28], [-91, 30],
-      [-89, 30], [-89, 28], [-87, 28], [-87, 18], [-84, 18],
-      [-84, 10], [-81, 10], [-81, 25], [-78, 25], [-78, 12],
-      [-75, 12], [-75, 35], [-73, 35], [-73, 38], [-71, 38],
-      [-71, 35], [-69, 35], [-69, 15], [-66, 15], [-66, 20],
-      [-63, 20], [-63, 10], [-60, 10], [-60, 28], [-57, 28],
-      [-57, 8], [-54, 8], [-54, 18], [-51, 18], [-51, 32],
-      [-48, 32], [-48, 20], [-45, 20], [-45, 42], [-43, 42],
-      [-43, 45], [-41, 45], [-41, 42], [-39, 42], [-39, 18],
-      [-36, 18], [-36, 25], [-33, 25], [-33, 12], [-30, 12],
-      [-30, 30], [-27, 30], [-27, 55], [-25, 55], [-25, 58],
-      [-23, 58], [-23, 60], [-21, 60], [-21, 58], [-19, 58],
-      [-19, 55], [-17, 55], [-17, 30], [-14, 30], [-14, 22],
-      [-11, 22], [-11, 35], [-8, 35], [-8, 18], [-5, 18],
-      [-5, 40], [-3, 40], [-3, 42], [-1, 42], [-1, 40],
-      [1, 40], [1, 18], [4, 18], [4, 35], [7, 35],
-      [7, 22], [10, 22], [10, 55], [12, 55], [12, 58],
-      [14, 58], [14, 60], [16, 60], [16, 58], [18, 58],
-      [18, 55], [20, 55], [20, 25], [23, 25], [23, 38],
-      [26, 38], [26, 20], [29, 20], [29, 32], [32, 32],
-      [32, 15], [35, 15], [35, 28], [38, 28], [38, 10],
-      [41, 10], [41, 22], [44, 22], [44, 12], [47, 12],
-      [47, 35], [50, 35], [50, 8], [53, 8], [53, 42],
-      [56, 42], [56, 20], [59, 20], [59, 30], [62, 30],
-      [62, 15], [65, 15], [65, 38], [68, 38], [68, 18],
-      [71, 18], [71, 25], [74, 25], [74, 10], [77, 10],
-      [77, 20], [80, 20], [80, 12], [83, 12], [83, 28],
-      [86, 28], [86, 8], [89, 8], [89, 15], [92, 15],
-      [92, 22], [95, 22], [95, 8], [98, 8], [98, 18],
-      [101, 18], [101, 12], [104, 12], [104, 8], [110, 8],
-      [110, -8], [-120, -8],
-    ];
-
-    s.moveTo(points[0][0], points[0][1]);
-    points.forEach(([x, y]) => s.lineTo(x, y));
-    return s;
-  }, []);
-
-  return (
-    <mesh position={[0, -2, -250]} rotation={[0, 0, 0]} scale={[2.8, 2.8, 1]}>
-      <shapeGeometry args={[shape]} />
-      <meshBasicMaterial color="#0a0812" />
-    </mesh>
-  );
-}
-
-
-
-function UrbanSprawl({ progress }: { progress: MotionValue<number> }) {
-  const buildings = useMemo(() => {
-    const result = [];
-    for (let i = 0; i < 220; i++) {
-      const w = 1.5 + Math.random() * 3;
-      const d = 1.5 + Math.random() * 3;
-      const h = 1.0 + Math.random() * 5;
-      const cols = Math.max(1, Math.floor(w / 1.1));
-      const rows = Math.max(1, Math.floor(h / 1.2));
-      const windows: { wx: number, wy: number, color: string }[] = [];
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (Math.random() > 0.35) {
-            const rand = Math.random();
-            windows.push({
-              wx: -w / 2 + 0.5 + c * (w / cols),
-              wy: 0.4 + r * (h / rows),
-              color: rand > 0.6 ? '#ffcc77' : rand > 0.3 ? '#ffaa44' : '#aaddff',
-            });
-          }
-        }
-      }
-      result.push({
-        id: i,
-        x: -70 + Math.random() * 140,
-        z: -38 - Math.random() * 30,
-        w, d, h, windows,
-      });
+    const result: { z: number; w: number; d: number; xOff: number; rot: number; yOff: number }[] = [];
+    let z = 16;
+    while (z > -56) {
+      const w    = 2.8 + rng() * 1.8;      // 2.8–4.6 wide  (landscape orientation)
+      const d    = 0.7 + rng() * 0.7;      // 0.7–1.4 deep  (thin slabs)
+      const xOff = (rng() - 0.5) * 0.5;   // subtle wander, mostly centered
+      const rot  = (rng() - 0.5) * 0.14;  // subtle rotation
+      const yOff = rng() * 0.03;           // very slight height variation
+      result.push({ z, w, d, xOff, rot, yOff });
+      z -= d + 0.25 + rng() * 0.4;         // clear gaps between tiles
     }
     return result;
   }, []);
 
-  const meshRef = useRef<THREE.InstancedMesh>(null);
-  const windowMeshRef = useRef<THREE.InstancedMesh>(null);
-
-  const totalWindows = useMemo(() => buildings.reduce((acc: number, b: any) => acc + b.windows.length, 0), [buildings]);
-
-  useEffect(() => {
-    if (!meshRef.current || !windowMeshRef.current) return;
-
-    // Initialize all to zero scale to prevent artifacts
-    const zeroDummy = new THREE.Object3D();
-    zeroDummy.scale.set(0, 0, 0);
-    zeroDummy.updateMatrix();
-
-    // meshRef initialization
-    const meshCount = meshRef.current.count;
-    for (let i = 0; i < meshCount; i++) {
-      meshRef.current.setMatrixAt(i, zeroDummy.matrix);
-    }
-    meshRef.current.instanceMatrix.needsUpdate = true;
-
-    // windowMeshRef initialization
-    const windowCount = windowMeshRef.current.count;
-    for (let i = 0; i < windowCount; i++) {
-      windowMeshRef.current.setMatrixAt(i, zeroDummy.matrix);
-    }
-    windowMeshRef.current.instanceMatrix.needsUpdate = true;
-
-    const dummy = new THREE.Object3D();
-    const color = new THREE.Color();
-    let winIndex = 0;
-
-    buildings.forEach((b) => {
-      // Building body
-      dummy.position.set(b.x, b.h / 2, b.z);
-      dummy.scale.set(b.w, b.h, b.d);
-      dummy.updateMatrix();
-      meshRef.current!.setMatrixAt(b.id, dummy.matrix);
-
-      // Building windows
-      b.windows.forEach((win) => {
-        dummy.position.set(b.x + win.wx, win.wy, b.z + b.d / 2 + 0.01);
-        dummy.scale.set(0.28, 0.35, 1);
-        dummy.updateMatrix();
-        windowMeshRef.current!.setMatrixAt(winIndex, dummy.matrix);
-        windowMeshRef.current!.setColorAt(winIndex, color.set(win.color));
-        winIndex++;
-      });
-    });
-
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    windowMeshRef.current.instanceMatrix.needsUpdate = true;
-    if (windowMeshRef.current.instanceColor) windowMeshRef.current.instanceColor.needsUpdate = true;
-  }, [buildings]);
-
   return (
-    <group position={[0, -2, 0]}>
-      <instancedMesh ref={meshRef} args={[undefined, undefined, buildings.length]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#0d0c1a" roughness={0.85} emissive="#ffdd99" emissiveIntensity={0.05} />
-      </instancedMesh>
-      <instancedMesh ref={windowMeshRef} args={[undefined, undefined, totalWindows]}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial toneMapped={false} />
-      </instancedMesh>
+    <group>
+      {tiles.map((t, i) => (
+        <mesh
+          key={i}
+          position={[t.xOff, -0.46 + t.yOff, t.z]}
+          rotation={[0, t.rot, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[t.w, 0.12, t.d]} />
+          <meshStandardMaterial color="#a8a8b8" roughness={0.88} metalness={0.04} />
+        </mesh>
+      ))}
     </group>
   );
 }
 
-function ElevatedTrain() {
-  const trainRef = useRef<THREE.Group>(null);
+// ── Falling sakura petals ─────────────────────────────────────────────────────
+function SakuraPetals() {
+  const COUNT = 280;
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummy   = useRef(new THREE.Object3D()).current;
 
-  useFrame((state) => {
-    if (!trainRef.current) return;
-    const t = state.clock.getElapsedTime();
-    // Loop train from left to right
-    trainRef.current.position.x = -40 + ((t * 4) % 80);
+  const petals = useRef(
+    Array.from({ length: COUNT }, () => ({
+      x:         (Math.random() - 0.5) * 28,
+      y:         Math.random() * 14 + 2,
+      z:         -2 - Math.random() * 32,
+      vy:        -(0.018 + Math.random() * 0.025),
+      vx:        (Math.random() - 0.5) * 0.008,
+      rotZ:      Math.random() * Math.PI * 2,
+      rotSpeed:  (Math.random() - 0.5) * 0.045,
+      swayOffset: Math.random() * Math.PI * 2,
+      swayAmp:   0.004 + Math.random() * 0.009,
+      swaySpeed: 0.35 + Math.random() * 0.65,
+      scale:     0.10 + Math.random() * 0.09,
+    }))
+  ).current;
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.elapsedTime;
+    petals.forEach((p, i) => {
+      p.y   += p.vy;
+      p.x   += p.vx + Math.sin(t * p.swaySpeed + p.swayOffset) * p.swayAmp;
+      p.rotZ += p.rotSpeed;
+      if (p.y < -1) {
+        p.y = 12 + Math.random() * 10;
+        p.x = (Math.random() - 0.5) * 28;
+        p.z = -2 - Math.random() * 32;
+      }
+      dummy.position.set(p.x, p.y, p.z);
+      dummy.rotation.set(Math.PI * 0.3, 0, p.rotZ);
+      dummy.scale.setScalar(p.scale);
+      dummy.updateMatrix();
+      meshRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
   });
 
-  const pillarColor = "#1a1828";
-  const trackColor = "#2a2838";
-  const trainColor = "#c8c0d8";
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, COUNT]} frustumCulled={false}>
+      <planeGeometry args={[1, 0.65]} />
+      <meshStandardMaterial
+        color="#f5a0c0"
+        emissive="#e06090"
+        emissiveIntensity={0.35}
+        transparent
+        opacity={0.82}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+      />
+    </instancedMesh>
+  );
+}
+
+// ── Bird silhouettes crossing the moon ────────────────────────────────────────
+function Birds() {
+  const bird1Ref = useRef<THREE.Mesh>(null);
+  const bird2Ref = useRef<THREE.Mesh>(null);
+
+  const birdShape = useMemo(() => {
+    const s = new THREE.Shape();
+    s.moveTo(-1.4, -0.1);
+    s.lineTo(-0.7,  0.3);
+    s.lineTo(-0.2,  0.05);
+    s.lineTo( 0,    0.15);
+    s.lineTo( 0.2,  0.05);
+    s.lineTo( 0.7,  0.3);
+    s.lineTo( 1.4, -0.1);
+    s.lineTo( 0.7, -0.15);
+    s.lineTo( 0,   -0.05);
+    s.lineTo(-0.7, -0.15);
+    s.closePath();
+    return s;
+  }, []);
+
+  // Moon sits at [20, 26, -18]. Birds cross left→right just in front (z = -16).
+  const PERIOD = 15, SPAN = 40;
+
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    if (bird1Ref.current) {
+      const phase = (t % PERIOD) / PERIOD;
+      bird1Ref.current.position.x = 20 - SPAN / 2 + phase * SPAN;
+    }
+    if (bird2Ref.current) {
+      const phase = ((t + 7) % PERIOD) / PERIOD;
+      bird2Ref.current.position.x = 20 - SPAN / 2 + phase * SPAN;
+    }
+  });
 
   return (
-    <group position={[0, -2, -28]}>
-      {/* Track beam — long horizontal */}
-      <mesh position={[0, 4.2, 0]}>
-        <boxGeometry args={[80, 0.2, 0.8]} />
-        <meshStandardMaterial color={trackColor} roughness={0.9} />
+    <group>
+      <mesh ref={bird1Ref} position={[20, 27.2, -16]} scale={1.5}>
+        <shapeGeometry args={[birdShape]} />
+        <meshBasicMaterial color="#0a0510" transparent opacity={0.88} depthWrite={false} />
       </mesh>
-      {/* Rail lines */}
-      <mesh position={[0, 4.35, -0.2]}>
-        <boxGeometry args={[80, 0.08, 0.08]} />
-        <meshStandardMaterial color="#3a3848" roughness={0.8} />
+      <mesh ref={bird2Ref} position={[20, 24.5, -16]} scale={1.1}>
+        <shapeGeometry args={[birdShape]} />
+        <meshBasicMaterial color="#0a0510" transparent opacity={0.82} depthWrite={false} />
       </mesh>
-      <mesh position={[0, 4.35, 0.2]}>
-        <boxGeometry args={[80, 0.08, 0.08]} />
-        <meshStandardMaterial color="#3a3848" roughness={0.8} />
+    </group>
+  );
+}
+
+// ── Flickering lantern light ───────────────────────────────────────────────────
+function FlickerLight({ position }: { position: [number, number, number] }) {
+  const ref    = useRef<THREE.PointLight>(null);
+  const offset = useMemo(() => Math.random() * 100, []);
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    const t = clock.elapsedTime + offset;
+    const flicker =
+      Math.sin(t * 7.3)  * 0.18 +
+      Math.sin(t * 13.7) * 0.10 +
+      Math.sin(t * 2.1)  * 0.06;
+    ref.current.intensity = 4.0 + flicker * 1.4;
+  });
+  return <pointLight ref={ref} position={position} color="#ff9020" intensity={4.0} distance={18} decay={2} />;
+}
+
+// ── Cherry blossom tree with canopy sway ──────────────────────────────────────
+function BlossomTree({ x, z, scale = 1 }: {
+  x: number; z: number; scale?: number;
+}) {
+  const groupRef   = useRef<THREE.Group>(null);
+  const swayOffset = useMemo(() => Math.random() * Math.PI * 2, []);
+  const swaySpeed  = useMemo(() => 0.30 + Math.random() * 0.20, []);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.elapsedTime;
+    groupRef.current.rotation.z = Math.sin(t * swaySpeed + swayOffset) * 0.028;
+    groupRef.current.rotation.x = Math.sin(t * swaySpeed * 0.7 + swayOffset + 1) * 0.014;
+  });
+
+  return (
+    <group ref={groupRef} position={[x, -0.5, z]} scale={[scale, scale, scale]}>
+      {/* Trunk — thick, dark brown */}
+      <mesh position={[0, 2.5, 0]} castShadow>
+        <cylinderGeometry args={[0.22, 0.32, 5.0, 6]} />
+        <meshStandardMaterial color="#5a3420" roughness={0.97} />
+      </mesh>
+      {/* Main canopy — LOW poly, vibrant pink */}
+      <mesh position={[0, 6.2, 0]} castShadow>
+        <sphereGeometry args={[2.8, 6, 5]} />
+        <meshStandardMaterial color="#f5a0c0" emissive="#e8609a" emissiveIntensity={0.65} roughness={0.8} />
+      </mesh>
+      {/* Left cluster */}
+      <mesh position={[-1.8, 5.6, 0.2]} castShadow>
+        <sphereGeometry args={[1.9, 6, 5]} />
+        <meshStandardMaterial color="#f0a0bc" emissive="#e05590" emissiveIntensity={0.60} roughness={0.8} />
+      </mesh>
+      {/* Right cluster */}
+      <mesh position={[1.8, 5.4, -0.2]} castShadow>
+        <sphereGeometry args={[2.0, 6, 5]} />
+        <meshStandardMaterial color="#f8aac8" emissive="#e86098" emissiveIntensity={0.60} roughness={0.8} />
+      </mesh>
+      {/* Front lower cluster */}
+      <mesh position={[0.5, 4.8, 1.5]} castShadow>
+        <sphereGeometry args={[1.5, 5, 4]} />
+        <meshStandardMaterial color="#ee98b8" emissive="#d84e88" emissiveIntensity={0.58} roughness={0.8} />
+      </mesh>
+      {/* Top small cluster */}
+      <mesh position={[0, 8.0, 0]} castShadow>
+        <sphereGeometry args={[1.2, 5, 4]} />
+        <meshStandardMaterial color="#fcc0d8" emissive="#f070a8" emissiveIntensity={0.65} roughness={0.8} />
+      </mesh>
+    </group>
+  );
+}
+
+// ── Stone lanterns — chunky, 3-part stacked boxes, glowing amber window ────────
+function StoneWayLanterns() {
+  const positions: [number, number][] = [
+    [-4.0,  -3], [ 4.0,  -3],
+    [-4.0, -13], [ 4.0, -13],
+    [-4.0, -23], [ 4.0, -23],
+  ];
+
+  return (
+    <group>
+      {positions.map(([x, z], i) => (
+        <group key={i} position={[x, -0.5, z]}>
+          {/* Wide flat base */}
+          <mesh position={[0, 0.2, 0]} castShadow>
+            <boxGeometry args={[1.5, 0.4, 1.5]} />
+            <meshStandardMaterial color="#62626e" roughness={0.96} />
+          </mesh>
+          {/* Narrow pedestal */}
+          <mesh position={[0, 0.75, 0]} castShadow>
+            <boxGeometry args={[0.8, 0.7, 0.8]} />
+            <meshStandardMaterial color="#585864" roughness={0.96} />
+          </mesh>
+          {/* Lantern body */}
+          <mesh position={[0, 1.45, 0]} castShadow>
+            <boxGeometry args={[1.05, 1.0, 1.05]} />
+            <meshStandardMaterial color="#505060" roughness={0.92} />
+          </mesh>
+          {/* Glowing windows — all 4 sides */}
+          <mesh position={[0, 1.45,  0.54]}><boxGeometry args={[0.52, 0.52, 0.01]} /><meshBasicMaterial color="#ffcc60" toneMapped={false} /></mesh>
+          <mesh position={[0, 1.45, -0.54]}><boxGeometry args={[0.52, 0.52, 0.01]} /><meshBasicMaterial color="#ffcc60" toneMapped={false} /></mesh>
+          <mesh position={[ 0.54, 1.45, 0]} rotation={[0, Math.PI / 2, 0]}><boxGeometry args={[0.52, 0.52, 0.01]} /><meshBasicMaterial color="#ffcc60" toneMapped={false} /></mesh>
+          <mesh position={[-0.54, 1.45, 0]} rotation={[0, Math.PI / 2, 0]}><boxGeometry args={[0.52, 0.52, 0.01]} /><meshBasicMaterial color="#ffcc60" toneMapped={false} /></mesh>
+          {/* Wide overhanging cap */}
+          <mesh position={[0, 2.0, 0]} castShadow>
+            <boxGeometry args={[1.4, 0.18, 1.4]} />
+            <meshStandardMaterial color="#585864" roughness={0.95} />
+          </mesh>
+          {/* Flickering amber flame light */}
+          <FlickerLight position={[0, 1.45, 0]} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// ── City data — seeded, computed once at module load ──────────────────────────
+type Building   = { x: number; z: number; w: number; h: number; d: number };
+type WinTile    = { x: number; y: number; z: number; ww: number };
+type RoofDetail = { x: number; y: number; z: number; w: number; h: number; d: number };
+
+function buildCityData(): { buildings: Building[]; windows: WinTile[]; roofDetails: RoofDetail[] } {
+  let s = 137;
+  const rng = () => {
+    s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+
+  const buildings:   Building[]   = [];
+  const windows:     WinTile[]    = [];
+  const roofDetails: RoofDetail[] = [];
+
+  const addBuilding = (x: number, z: number, w: number, h: number, d: number) => {
+    buildings.push({ x, z, w, h, d });
+
+    // Individual scattered windows per floor (not full-width strips)
+    const numFloors = Math.max(1, Math.floor(h / 2.2));
+    for (let fl = 0; fl < numFloors; fl++) {
+      const y = 0.9 + fl * 2.2;
+      if (y > h - 0.8) continue;
+      const numWins = 2 + Math.floor(rng() * 3);
+      for (let wn = 0; wn < numWins; wn++) {
+        const ww   = 0.35 + rng() * 0.35;
+        const xOff = (rng() - 0.5) * Math.max(0, w - ww - 0.3);
+        windows.push({ x: x + xOff, y, z: z + d / 2 + 0.06, ww });
+      }
+    }
+
+    // Flat roof cap — slightly wider, defines the top edge
+    roofDetails.push({ x, y: h - 0.5 + 0.18, z, w: w + 0.5, h: 0.35, d: d + 0.5 });
+
+    // Stepped top section on taller buildings
+    if (h > 9 && rng() > 0.45) {
+      const sw = w * (0.45 + rng() * 0.25);
+      const sd = d * (0.45 + rng() * 0.25);
+      const sh = 1.5 + rng() * 3.0;
+      roofDetails.push({ x, y: h - 0.5 + sh / 2, z, w: sw, h: sh, d: sd });
+    }
+  };
+
+  // Left cluster
+  for (let i = 0; i < 36; i++) addBuilding(
+    -62 + rng() * 38, -56 - rng() * 18,
+    2.5 + rng() * 4, 2 + rng() * 6, 2.5 + rng() * 3.5,
+  );
+  // Center — tallest
+  for (let i = 0; i < 48; i++) addBuilding(
+    -24 + rng() * 48, -53 - rng() * 20,
+    2.5 + rng() * 5, 5 + rng() * 12, 2.5 + rng() * 4,
+  );
+  // Right cluster
+  for (let i = 0; i < 36; i++) addBuilding(
+    24 + rng() * 38, -56 - rng() * 18,
+    2.5 + rng() * 4, 2 + rng() * 6, 2.5 + rng() * 3.5,
+  );
+
+  return { buildings, windows, roofDetails };
+}
+
+const CITY_DATA = buildCityData();
+
+// ── City skyline ──────────────────────────────────────────────────────────────
+function CityBackground() {
+  const bodyRef = useRef<THREE.InstancedMesh>(null);
+  const winRef  = useRef<THREE.InstancedMesh>(null);
+  const capRef  = useRef<THREE.InstancedMesh>(null);
+  const { buildings, windows, roofDetails } = CITY_DATA;
+
+  // Flicker state — ~15% of windows randomly blink on/off
+  const flickerDummy  = useRef(new THREE.Object3D()).current;
+  const flickerWins   = useRef<{ idx: number; nextFlip: number; on: boolean }[]>([]);
+
+  useEffect(() => {
+    if (!bodyRef.current || !winRef.current || !capRef.current) return;
+    const dummy = new THREE.Object3D();
+
+    buildings.forEach((b, i) => {
+      dummy.position.set(b.x, b.h / 2 - 0.5, b.z);
+      dummy.scale.set(b.w, b.h, b.d);
+      dummy.updateMatrix();
+      bodyRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    bodyRef.current.instanceMatrix.needsUpdate = true;
+
+    windows.forEach((w, i) => {
+      dummy.position.set(w.x, w.y, w.z);
+      dummy.scale.set(w.ww, 0.28, 0.05);
+      dummy.updateMatrix();
+      winRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    winRef.current.instanceMatrix.needsUpdate = true;
+
+    roofDetails.forEach((r, i) => {
+      dummy.position.set(r.x, r.y, r.z);
+      dummy.scale.set(r.w, r.h, r.d);
+      dummy.updateMatrix();
+      capRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    capRef.current.instanceMatrix.needsUpdate = true;
+
+    // Pick flickerable windows after initial setup
+    flickerWins.current = windows
+      .map((_, i) => i)
+      .filter(() => Math.random() < 0.15)
+      .map(idx => ({ idx, nextFlip: Math.random() * 8, on: true }));
+  }, [buildings, windows, roofDetails]);
+
+  useFrame(({ clock }) => {
+    if (!winRef.current || flickerWins.current.length === 0) return;
+    const t = clock.elapsedTime;
+    let dirty = false;
+    flickerWins.current.forEach(f => {
+      if (t < f.nextFlip) return;
+      f.on = !f.on;
+      f.nextFlip = t + 2 + Math.random() * 10;
+      const w = windows[f.idx];
+      flickerDummy.position.set(w.x, w.y, w.z);
+      flickerDummy.scale.set(w.ww, f.on ? 0.28 : 0, 0.05);
+      flickerDummy.updateMatrix();
+      winRef.current!.setMatrixAt(f.idx, flickerDummy.matrix);
+      dirty = true;
+    });
+    if (dirty) winRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <group>
+      {/* Building bodies — cool slate, fog-affected */}
+      <instancedMesh ref={bodyRef} args={[undefined, undefined, buildings.length]} frustumCulled={false}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#4a5068" roughness={0.95} />
+      </instancedMesh>
+
+      {/* Individual windows — small scattered tiles, no fog */}
+      <instancedMesh ref={winRef} args={[undefined, undefined, windows.length]} frustumCulled={false}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial color="#ffd060" toneMapped={false} fog={false} />
+      </instancedMesh>
+
+      {/* Roof caps + stepped tops — slightly lighter slate */}
+      <instancedMesh ref={capRef} args={[undefined, undefined, roofDetails.length]} frustumCulled={false}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#686880" roughness={0.92} />
+      </instancedMesh>
+
+      {/* City glow lights */}
+      <pointLight position={[  0, 4, -65]} color="#f0a840" intensity={18} distance={160} decay={1} />
+      <pointLight position={[-40, 4, -68]} color="#f0a840" intensity={9}  distance={110} decay={1} />
+      <pointLight position={[ 40, 4, -68]} color="#f0a840" intensity={9}  distance={110} decay={1} />
+    </group>
+  );
+}
+
+// ── Mount Fuji — low-poly faceted silhouette behind the city ────────────────
+function MountFuji() {
+  return (
+    <group>
+      {/* Main cone (mountain body) */}
+      <mesh position={[0, 8, -130]}>
+        <coneGeometry args={[58, 80, 6]} />
+        <meshStandardMaterial color="#2a2d3a" emissive="#151820" emissiveIntensity={0.15} roughness={1.0} />
       </mesh>
 
-      {/* Support pillars every 8 units */}
-      {Array.from({ length: 11 }).map((_, i) => (
-        <group key={i} position={[-40 + i * 8, 0, 0]}>
-          {/* Pillar */}
-          <mesh position={[0, 2, 0]}>
-            <boxGeometry args={[0.4, 4, 0.4]} />
-            <meshStandardMaterial color={pillarColor} roughness={0.9} />
+      {/* Snow cap */}
+      <mesh position={[0, 40, -130]}>
+        <coneGeometry args={[22, 22, 6]} />
+        <meshStandardMaterial color="#dde8f5" emissive="#aac4e8" emissiveIntensity={0.6} roughness={0.9} />
+      </mesh>
+
+      {/* Snow skirt — wider band just below the cap */}
+      <mesh position={[0, 30, -130]}>
+        <coneGeometry args={[30, 8, 6]} />
+        <meshStandardMaterial color="#dde8f5" emissive="#aac4e8" emissiveIntensity={0.6} roughness={0.9} />
+      </mesh>
+
+      {/* Left foothill */}
+      <mesh position={[-52, -4, -122]}>
+        <coneGeometry args={[32, 36, 5]} />
+        <meshStandardMaterial color="#1e2428" emissive="#0e1214" emissiveIntensity={0.1} roughness={1.0} />
+      </mesh>
+
+      {/* Right foothill */}
+      <mesh position={[50, -4, -122]}>
+        <coneGeometry args={[28, 32, 5]} />
+        <meshStandardMaterial color="#1e2428" emissive="#0e1214" emissiveIntensity={0.1} roughness={1.0} />
+      </mesh>
+
+      {/* Atmosphere glow behind the summit */}
+      <mesh position={[0, 18, -138]}>
+        <sphereGeometry args={[45, 8, 6]} />
+        <meshBasicMaterial color="#7b5ea7" transparent opacity={0.08} depthWrite={false} />
+      </mesh>
+    </group>
+  );
+}
+
+// ── Wispy clouds drifting across the sky ───────────────────────────────────────
+function WispyClouds() {
+  const cloudData = useMemo(() => [
+    { pos: [-22, 28, -18] as [number, number, number], scale: [10,  1.6, 3.0] as [number, number, number], opacity: 0.08, speed: 0.004 },
+    { pos: [-14, 32, -25] as [number, number, number], scale: [ 8,  1.4, 2.5] as [number, number, number], opacity: 0.10, speed: 0.006 },
+    { pos: [ -6, 35, -30] as [number, number, number], scale: [12,  1.8, 3.5] as [number, number, number], opacity: 0.07, speed: 0.005 },
+    { pos: [  2, 30, -20] as [number, number, number], scale: [14,  2.0, 4.0] as [number, number, number], opacity: 0.09, speed: 0.003 },
+    { pos: [-18, 22, -12] as [number, number, number], scale: [ 6,  1.2, 2.0] as [number, number, number], opacity: 0.13, speed: 0.007 },
+    { pos: [-10, 26, -15] as [number, number, number], scale: [ 9,  1.5, 3.0] as [number, number, number], opacity: 0.11, speed: 0.008 },
+    { pos: [-26, 24, -22] as [number, number, number], scale: [11,  1.7, 3.2] as [number, number, number], opacity: 0.09, speed: 0.005 },
+    // Deep-scene clouds — visible during city / Fuji scroll chapters
+    { pos: [-20, 22, -58] as [number, number, number], scale: [12,  1.5, 3.4] as [number, number, number], opacity: 0.08, speed: 0.004 },
+    { pos: [ -8, 26, -65] as [number, number, number], scale: [ 9,  1.8, 2.8] as [number, number, number], opacity: 0.10, speed: 0.005 },
+    { pos: [  4, 20, -72] as [number, number, number], scale: [13,  1.3, 3.6] as [number, number, number], opacity: 0.06, speed: 0.003 },
+    { pos: [ 14, 24, -60] as [number, number, number], scale: [ 7,  1.6, 2.4] as [number, number, number], opacity: 0.11, speed: 0.006 },
+    { pos: [-30, 18, -68] as [number, number, number], scale: [10,  1.4, 3.0] as [number, number, number], opacity: 0.07, speed: 0.002 },
+    { pos: [  8, 28, -80] as [number, number, number], scale: [11,  2.0, 3.8] as [number, number, number], opacity: 0.09, speed: 0.004 },
+  ], []);
+
+  const refs = useRef<(THREE.Group | null)[]>([]);
+
+  useFrame(() => {
+    cloudData.forEach((cloud, i) => {
+      const group = refs.current[i];
+      if (!group) return;
+      group.position.x += cloud.speed;
+      if (group.position.x > 15) {
+        group.position.x = -40;
+      }
+    });
+  });
+
+  return (
+    <group>
+      {cloudData.map((cloud, i) => (
+        <group
+          key={i}
+          ref={el => { refs.current[i] = el; }}
+          position={cloud.pos}
+          scale={cloud.scale}
+        >
+          {/* Center sphere */}
+          <mesh>
+            <sphereGeometry args={[1, 5, 4]} />
+            <meshBasicMaterial color="#d8c8f0" transparent opacity={cloud.opacity} depthWrite={false} />
           </mesh>
-          {/* Crossbeam */}
-          <mesh position={[0, 3.8, 0]}>
-            <boxGeometry args={[1.2, 0.25, 0.6]} />
-            <meshStandardMaterial color={pillarColor} roughness={0.9} />
+          {/* Left sphere */}
+          <mesh position={[-2.0, 0.2, 0]}>
+            <sphereGeometry args={[1, 5, 4]} />
+            <meshBasicMaterial color="#d8c8f0" transparent opacity={cloud.opacity} depthWrite={false} />
+          </mesh>
+          {/* Right sphere */}
+          <mesh position={[1.8, -0.3, 0.5]}>
+            <sphereGeometry args={[1, 5, 4]} />
+            <meshBasicMaterial color="#d8c8f0" transparent opacity={cloud.opacity} depthWrite={false} />
           </mesh>
         </group>
       ))}
-
-      {/* Train — 4 cars */}
-      <group ref={trainRef} position={[-40, 4.45, 0]}>
-        {[0, 3.2, 6.4, 9.6].map((offset, ci) => (
-          <group key={ci} position={[offset, 0, 0]}>
-            {/* Car body */}
-            <mesh position={[0, 0.6, 0]}>
-              <boxGeometry args={[2.8, 1.0, 0.7]} />
-              <meshStandardMaterial
-                color={trainColor}
-                emissive="#8888cc"
-                emissiveIntensity={0.15}
-                roughness={0.4}
-                metalness={0.3}
-              />
-            </mesh>
-            {/* Windows strip */}
-            <mesh position={[0, 0.72, 0.36]}>
-              <boxGeometry args={[2.2, 0.35, 0.02]} />
-              <meshStandardMaterial
-                color="#aaddff"
-                emissive="#aaddff"
-                emissiveIntensity={0.8}
-                roughness={0.2}
-              />
-            </mesh>
-            {/* Stripe accent */}
-            <mesh position={[0, 0.28, 0.36]}>
-              <boxGeometry args={[2.8, 0.1, 0.02]} />
-              <meshStandardMaterial color="#4466cc" emissive="#4466cc" emissiveIntensity={0.5} />
-            </mesh>
-          </group>
-        ))}
-        {/* Train headlight */}
-        <pointLight position={[13, 0.6, 0]} color="#ffffff" intensity={1.5} distance={8} />
-      </group>
     </group>
   );
 }
 
+// ── Main export ───────────────────────────────────────────────────────────────
 export default function Environment({ progress }: Props) {
-  const fogRef = useRef<THREE.FogExp2>(null);
-  const dawnLightRef = useRef<THREE.DirectionalLight>(null);
+  const gateGlowRef = useRef<THREE.PointLight>(null);
+  const fogRef = useRef(new THREE.FogExp2('#b87030', 0.009));
 
-  const sunPositionRef = useRef(new THREE.Vector3(0, -0.1, -1));
-  const rayleighRef = useRef(6);
-  const turbidityRef = useRef(8);
-
-  const treePositions: [number, number, number][] = useMemo(() => [
-    // Left side forest — close to gate
-    [-3, 0, -2], [-5, 0, -4], [-7, 0, -1], [-4, 0, -8],
-    [-8, 0, -6], [-10, 0, -3], [-6, 0, -13], [-9, 0, -11],
-    [-12, 0, -7], [-11, 0, -15],
-    // Right side forest — close to gate
-    [3, 0, -2], [5, 0, -4], [7, 0, -1], [4, 0, -8],
-    [8, 0, -6], [10, 0, -3], [6, 0, -13], [9, 0, -11],
-    [12, 0, -7], [11, 0, -15],
-    // Behind gate — deeper forest
-    [-2, 0, -16], [2, 0, -18], [-5, 0, -22], [5, 0, -20],
-  ], []);
-
-  // Dense City Grid Generation
-  const cityBlocks = useMemo(() => {
-    const blocks = [];
-    for (let i = 0; i < 200; i++) {
-      const x = -45 + Math.random() * 90;
-      const z = -30 - Math.random() * 40;
-      const w = 1.2 + Math.random() * 3.5;
-      const d = 1.2 + Math.random() * 3.5;
-      const h = 3 + Math.random() * 18;
-      // Window grid: cols and rows based on building size
-      const cols = Math.floor(w / 0.9);
-      const rows = Math.floor(h / 1.2);
-      blocks.push({ id: i, x, z, w, d, h, cols, rows });
-    }
-    return blocks;
-  }, []);
-
-  const horizonBuildings = useMemo(() =>
-    Array.from({ length: 100 }).map((_, i) => {
-      const x = -60 + Math.random() * 120;
-      const z = -65 - Math.random() * 25; // z=-65 to z=-90, beyond existing city
-      const w = 2 + Math.random() * 5;
-      const d = 2 + Math.random() * 5;
-      const h = 15 + Math.random() * 35; // much taller to fill skyline
-      return { id: i, x, z, w, d, h };
-    })
-    , []);
-
-  // Generate window data separately — deterministic per building
-  const windowData = useMemo(() => cityBlocks.map(b => {
-    const windows: { row: number, col: number, lightLevel: number }[] = [];
-    for (let row = 0; row < b.rows; row++) {
-      for (let col = 0; col < b.cols; col++) {
-        const lit = Math.random();
-        // 3 light levels: dark, warm yellow, cool blue-white
-        const lightLevel = lit < 0.35 ? 0 : lit < 0.65 ? 1 : lit < 0.85 ? 2 : 3;
-        windows.push({ row, col, lightLevel });
-      }
-    }
-    return windows;
-  }), [cityBlocks]);
-
-  const windowColors = ['#000000', '#ff9f1c', '#ffda88', '#ffd700'];
-  const windowIntensity = [0, 1.2, 1.8, 2.5];
-
-  const cityMeshRef = useRef<THREE.InstancedMesh>(null);
-  const cityWindowMeshRef = useRef<THREE.InstancedMesh>(null);
-  const horizonMeshRef = useRef<THREE.InstancedMesh>(null);
-
-  const totalCityWindows = useMemo(() =>
-    windowData.reduce((acc: number, bWindows: { lightLevel: number }[]) =>
-      acc + bWindows.filter(w => w.lightLevel !== 0).length, 0),
-    [windowData]);
-
-  useEffect(() => {
-    if (!cityMeshRef.current || !cityWindowMeshRef.current || !horizonMeshRef.current) return;
-
-    // Initialize all to zero scale to prevent artifacts
-    const zeroDummy = new THREE.Object3D();
-    zeroDummy.scale.set(0, 0, 0);
-    zeroDummy.updateMatrix();
-
-    // cityMeshRef initialization
-    const cityCount = cityMeshRef.current.count;
-    for (let i = 0; i < cityCount; i++) {
-      cityMeshRef.current.setMatrixAt(i, zeroDummy.matrix);
-    }
-    cityMeshRef.current.instanceMatrix.needsUpdate = true;
-
-    // cityWindowMeshRef initialization
-    const cityWindowCount = cityWindowMeshRef.current.count;
-    for (let i = 0; i < cityWindowCount; i++) {
-      cityWindowMeshRef.current.setMatrixAt(i, zeroDummy.matrix);
-    }
-    cityWindowMeshRef.current.instanceMatrix.needsUpdate = true;
-
-    // horizonMeshRef initialization
-    const horizonCount = horizonMeshRef.current.count;
-    for (let i = 0; i < horizonCount; i++) {
-      horizonMeshRef.current.setMatrixAt(i, zeroDummy.matrix);
-    }
-    horizonMeshRef.current.instanceMatrix.needsUpdate = true;
-
-    const dummy = new THREE.Object3D();
-    const color = new THREE.Color();
-    let winIndex = 0;
-
-    // City Blocks
-    cityBlocks.forEach((b, bi) => {
-      dummy.position.set(b.x, b.h / 2, b.z);
-      dummy.scale.set(b.w, b.h, b.d);
-      dummy.updateMatrix();
-      cityMeshRef.current!.setMatrixAt(bi, dummy.matrix);
-
-      windowData[bi].forEach((win: { lightLevel: number, col: number, row: number }) => {
-        if (win.lightLevel === 0) return;
-        const wx = -b.w / 2 + 0.5 + (win.col * (b.w / b.cols));
-        const wy = 0.7 + (win.row * (b.h / b.rows));
-
-        dummy.position.set(b.x + wx, wy, b.z + b.d / 2 + 0.01);
-        dummy.scale.set(0.35, 0.45, 1);
-        dummy.updateMatrix();
-        cityWindowMeshRef.current!.setMatrixAt(winIndex, dummy.matrix);
-        cityWindowMeshRef.current!.setColorAt(winIndex, color.set(windowColors[win.lightLevel]));
-        winIndex++;
-      });
-    });
-
-    // Horizon
-    horizonBuildings.forEach((b, i) => {
-      dummy.position.set(b.x, b.h / 2, b.z);
-      dummy.scale.set(b.w, b.h, b.d);
-      dummy.updateMatrix();
-      horizonMeshRef.current!.setMatrixAt(i, dummy.matrix);
-    });
-
-    cityMeshRef.current.instanceMatrix.needsUpdate = true;
-    cityWindowMeshRef.current.instanceMatrix.needsUpdate = true;
-    if (cityWindowMeshRef.current.instanceColor) cityWindowMeshRef.current.instanceColor.needsUpdate = true;
-    horizonMeshRef.current.instanceMatrix.needsUpdate = true;
-  }, [cityBlocks, windowData, horizonBuildings]);
-
-  // We will force a component render periodically for the Sky if needed, but R3F useFrame can manipulate refs directly without re-render.
-
-  useFrame(() => {
+  useFrame(({ scene }) => {
     const p = progress.get();
 
-    // 1. Fog Color Lerping
-    if (fogRef.current) {
-      const fogColors = [
-        { stop: 0.0, color: new THREE.Color('#0a0a1a') },
-        { stop: 0.35, color: new THREE.Color('#1a1a35') },
-        { stop: 0.55, color: new THREE.Color('#342045') },
-        { stop: 0.8, color: new THREE.Color('#4e3a4e') },
-        { stop: 1.0, color: new THREE.Color('#6a4a40') },
-      ];
-
-      // Find segment
-      for (let i = 0; i < fogColors.length - 1; i++) {
-        if (p >= fogColors[i].stop && p <= fogColors[i + 1].stop) {
-          const start = fogColors[i];
-          const end = fogColors[i + 1];
-          const t = (p - start.stop) / (end.stop - start.stop);
-          fogRef.current.color.lerpColors(start.color, end.color, t);
-          break;
-        }
-      }
-
-      if (p > 1.0) fogRef.current.color.copy(fogColors[4].color);
-    }
-
-    // 1.5 Visibility Culling
-
-
-    // 2. Sky Lerping
-    // Manually setting properties to prevent massive re-renders
-    if (p <= 0.35) {
-      sunPositionRef.current.lerpVectors(
-        new THREE.Vector3(0, -0.5, -1),
-        new THREE.Vector3(0, -0.3, -1),
-        p / 0.35
-      );
-    } else if (p <= 0.80) {
-      sunPositionRef.current.lerpVectors(
-        new THREE.Vector3(0, -0.3, -1),
-        new THREE.Vector3(0, -0.1, -1),
-        (p - 0.35) / 0.45
-      );
-      rayleighRef.current = 6;
-      turbidityRef.current = 10;
-    } else {
-      sunPositionRef.current.lerpVectors(
-        new THREE.Vector3(0, -0.1, -1),
-        new THREE.Vector3(1, 0.5, -1),
-        (p - 0.80) / 0.20
-      );
-      rayleighRef.current = 2;
-      turbidityRef.current = 4;
-    }
-
-    const newSun = sunPositionRef.current;
-
-    // 3. Dawn Sun Light intensity lerp (0.55 -> 0.75)
-    if (dawnLightRef.current) {
-      if (p < 0.80) {
-        dawnLightRef.current.intensity = 0;
-      } else if (p <= 0.95) {
-        dawnLightRef.current.intensity = ((p - 0.80) / 0.15) * 2.0;
+    // Gate warm glow peaks as camera closes in (p=0→0.20), fades by p=0.35
+    if (gateGlowRef.current) {
+      if (p < 0.20) {
+        gateGlowRef.current.intensity = (p / 0.20) * 5.5;
+      } else if (p < 0.35) {
+        gateGlowRef.current.intensity = 5.5 * (1 - (p - 0.20) / 0.15);
       } else {
-        dawnLightRef.current.intensity = 2.0;
+        gateGlowRef.current.intensity = 0;
       }
+    }
+
+    // Amber haze — thickens as camera pushes into the city
+    scene.fog = fogRef.current;
+    if (p < 0.45) {
+      fogRef.current.density = 0.009;
+    } else if (p < 0.70) {
+      fogRef.current.density = 0.009 + ((p - 0.45) / 0.25) * 0.006;
+    } else {
+      fogRef.current.density = 0.015;
     }
   });
+
+  // Tree layout — symmetric pairs flanking the path, upright, close to camera
+  const trees = [
+    { x: -7,   z: -2,  s: 1.1  },
+    { x:  7,   z: -2,  s: 1.1  },
+    { x: -8,   z: -10, s: 1.0  },
+    { x:  8,   z: -10, s: 1.0  },
+    { x: -8.5, z: -19, s: 0.88 },
+    { x:  8.5, z: -19, s: 0.88 },
+    { x: -9,   z: -28, s: 0.72 },
+    { x:  9,   z: -28, s: 0.72 },
+  ];
 
   return (
     <>
-      <fogExp2 ref={fogRef} attach="fog" args={['#1a1a2e', 0.014]} />
+      {/* Gradient sky dome — deep indigo zenith → twilight purple → warm amber horizon */}
+      <GradientSky />
 
-      {/* Ambient — base scene fill */}
-      <ambientLight color="#5a4a60" intensity={0.25} />
+      {/* Wispy translucent clouds — fills empty left/center sky */}
+      <WispyClouds />
 
-      {/* Moonlight Wash to Illuminate Ground Options */}
-      <directionalLight position={[0, 20, 15]} color="#6080c0" intensity={0.3} />
+      {/* City horizon glow — warm amber light from below, simulates light pollution */}
+      <pointLight position={[0, -8, -60]} color="#f0a840" intensity={6} distance={180} decay={1} />
 
-      {/* Moon — shrine night scene */}
-      <pointLight position={[10, 20, -5]} color="#9a8bb0" intensity={1.5} distance={100} />
+      {/* Moon + halo + moonlight */}
+      <Moon />
 
-      {/* Torii warmth — orange accent at gate position */}
-      <pointLight position={[0, 3, 2]} color="#d90429" intensity={0.8} distance={12} />
+      {/* Bird silhouettes crossing the moon */}
+      <Birds />
 
-      {/* Ground rim — lifts the black floor */}
-      <pointLight position={[0, -1, 0]} color="#4a2060" intensity={1.0} distance={25} />
+      {/* Stars — upper hemisphere, seeded deterministic */}
+      <Stars />
 
-      {/* Left lantern glow */}
-      <pointLight position={[-2.2, 0.8, 1]} color="#ff8c42" intensity={1.2} distance={5} />
+      {/* Gate warm glow (dynamic) */}
+      <pointLight ref={gateGlowRef} position={[0, 5, 1]} color="#ff9050" intensity={0} distance={20} decay={2} />
 
-      {/* Right lantern glow */}
-      <pointLight position={[2.2, 0.8, 1]} color="#ff8c42" intensity={1.2} distance={5} />
+      {/* Ground */}
+      <Ground />
 
-      {/* Sky */}
-      <SkyController
-        sunRef={sunPositionRef}
-        rayleighRef={rayleighRef}
-        turbidityRef={turbidityRef}
-      />
+      {/* Grass tufts — flanking the stone path */}
+      <GrassTufts />
 
+      {/* Fireflies — warm ambient particles */}
+      <Fireflies />
 
+      {/* Ground mist wisps */}
+      <MistWisps />
 
-      {/* Dawn Sun directional light */}
-      <directionalLight
-        ref={dawnLightRef}
-        position={[20, 10, 5]}
-        color="#ffcc77"
-        intensity={0}
-        castShadow
-      />
+      {/* Ghibli stone path */}
+      <GhibliPath />
 
-      {/* Master 5-Option Interactive Ground Component */}
-      <GroundSystem />
+      {/* Falling sakura petals */}
+      <SakuraPetals />
 
-      {/* Dynamic Field Decor Switcher Component */}
-      <GrassField />
+      {/* Cherry blossom trees */}
+      {trees.map((t, i) => (
+        <BlossomTree key={i} x={t.x} z={t.z} scale={t.s} />
+      ))}
 
-      {/* Volumetric Ground Mist Plane */}
-      <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[60, 60]} />
-        <meshBasicMaterial color="#4a2880" transparent opacity={0.15} depthWrite={false} blending={THREE.AdditiveBlending} />
-      </mesh>
+      {/* Stone lanterns */}
+      <StoneWayLanterns />
 
-      {/* Blossom Ground */}
-      <mesh position={[0, -0.1, -15]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[30, 30]} />
-        <meshStandardMaterial color="#ffe0e8" roughness={1} />
-      </mesh>
+      {/* Mount Fuji — behind the city skyline */}
+      <MountFuji />
 
-      {/* Cherry Blossom Trees */}
-      <group>
-        {treePositions.map((pos, i) => (
-          // In React, since we are doing static trees based on scroll, we can use a wrapper component that listens to the progress and updates its own opacity
-          <TreeWrapper key={i} position={pos} progress={progress} index={i} />
-        ))}
-      </group>
+      {/* City skyline */}
+      <CityBackground />
 
-      {/* City crossing crowds */}
-      <ShibuyaCrossing />
+      {/* Directional moonlight — cool blue-white from moon's position */}
+      <directionalLight position={[20, 26, -18]} color="#c8d8ff" intensity={0.8} castShadow />
 
-      <SkylineSilhouette />
-
-
-
-      {/* Urban sprawl low buildings */}
-      <UrbanSprawl progress={progress} />
-      {/* Elevated train */}
-      <ElevatedTrain />
-
-      {/* City Blocks Dense Cluster */}
-      <group position={[0, -2, -20]}>
-        <instancedMesh ref={cityMeshRef} args={[undefined, undefined, cityBlocks.length]} castShadow>
-          <boxGeometry args={[1, 1, 1, 2, 2, 2]} />
-          <meshStandardMaterial
-            color="#0d0c1a"
-            emissive="#ffcc88"
-            emissiveIntensity={0.12}
-            roughness={0.8}
-          />
-        </instancedMesh>
-
-        <instancedMesh ref={cityWindowMeshRef} args={[undefined, undefined, totalCityWindows]}>
-          <planeGeometry args={[1, 1]} />
-          <meshBasicMaterial toneMapped={false} />
-        </instancedMesh>
-
-        <instancedMesh ref={horizonMeshRef} args={[undefined, undefined, horizonBuildings.length]} castShadow>
-          <boxGeometry args={[1, 1, 1, 2, 2, 2]} />
-          <meshStandardMaterial
-            color="#0a0918"
-            emissive="#ffcc88"
-            emissiveIntensity={0.1}
-            roughness={0.8}
-          />
-        </instancedMesh>
-
-        {/* Tokyo Tower — red lattice spire */}
-        <group position={[3, 0, -28]}>
-          {/* Base wide section */}
-          <mesh position={[0, 8, 0]}>
-            <coneGeometry args={[2.5, 16, 4]} />
-            <meshStandardMaterial color="#c0392b" emissive="#8b0000" emissiveIntensity={0.3} roughness={0.6} />
-          </mesh>
-          {/* Upper thin spire */}
-          <mesh position={[0, 22, 0]}>
-            <coneGeometry args={[0.6, 14, 4]} />
-            <meshStandardMaterial color="#c0392b" emissive="#8b0000" emissiveIntensity={0.4} roughness={0.6} />
-          </mesh>
-          {/* Observation deck band */}
-          <mesh position={[0, 14, 0]}>
-            <cylinderGeometry args={[1.2, 1.2, 1.0, 8]} />
-            <meshStandardMaterial color="#e8e0d0" emissive="#ffcc44" emissiveIntensity={0.6} />
-          </mesh>
-          {/* Beacon light at top */}
-          <pointLight position={[0, 30, 0]} color="#ff4444" intensity={2.0} distance={15} />
-        </group>
-      </group>
+      {/* Ground fill — lifts dark foreground grass */}
+      <pointLight position={[0, 5, 8]}  color="#f0e0c0" intensity={5.0} distance={60} decay={1.2} />
+      <pointLight position={[0, 5, -20]} color="#f0e0c0" intensity={3.5} distance={60} decay={1.2} />
     </>
-  );
-}
-
-// Wrapper to animate opacity of trees smoothly without forcing parent re-renders
-function TreeWrapper({ position, progress, index }: {
-  position: [number, number, number],
-  progress: MotionValue<number>,
-  index: number
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame(() => {
-    const p = progress.get();
-    let o = 0;
-    if (p <= 0.5) {
-      o = 1;
-    } else if (p <= 0.6) {
-      o = 1 - ((p - 0.5) / 0.1);
-    }
-    if (groupRef.current) {
-      groupRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
-          child.material.opacity = o;
-          child.visible = o > 0;
-        }
-      });
-    }
-  });
-
-  const scale = 0.7 + (index % 5) * 0.15;  // varies from 0.7 to 1.3
-
-  return (
-    <group ref={groupRef} position={position}>
-      <CherryBlossomTree position={[0, 0, 0]} opacity={1} scale={scale} />
-    </group>
   );
 }

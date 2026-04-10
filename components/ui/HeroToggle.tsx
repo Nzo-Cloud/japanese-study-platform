@@ -10,16 +10,25 @@ interface Props {
 
 export default function HeroToggle({ is3D, onToggle }: Props) {
   const [isHighPerf, setIsHighPerf] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Simple hardware detection: 8+ cores or 8G+ RAM is usually safe for Smooth WebGL
-    const cores = navigator.hardwareConcurrency || 4;
-    // @ts-ignore (deviceMemory is not in standard types but works on Chrome)
-    const memory = navigator.deviceMemory || 4;
-    if (cores >= 8 || memory >= 8) {
-      setIsHighPerf(true);
+    // Hide toggle and block 3D on small/touch screens
+    const mobile = window.innerWidth < 768 || ('ontouchstart' in window);
+    setIsMobile(mobile);
+
+    if (!mobile) {
+      // Simple hardware detection: 8+ cores or 8G+ RAM is usually safe for Smooth WebGL
+      const cores = navigator.hardwareConcurrency || 4;
+      // @ts-ignore (deviceMemory is not in standard types but works on Chrome)
+      const memory = navigator.deviceMemory || 4;
+      if (cores >= 8 || memory >= 8) {
+        setIsHighPerf(true);
+      }
     }
   }, []);
+
+  if (isMobile) return null;
 
   return (
     <div style={{

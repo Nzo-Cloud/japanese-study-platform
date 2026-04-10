@@ -10,7 +10,7 @@ export default function WhatsNewModal() {
 
   useEffect(() => {
     // Show for new version v1.6 with a short delay
-    const hasSeenEvent = localStorage.getItem('hasSeenWhatsNewV1_6');
+    const hasSeenEvent = localStorage.getItem('hasSeenWhatsNewV1_6_1');
     if (!hasSeenEvent) {
       const timer = setTimeout(() => {
         setIsOpen(true);
@@ -20,7 +20,7 @@ export default function WhatsNewModal() {
   }, []);
 
   const handleClose = () => {
-    localStorage.setItem('hasSeenWhatsNewV1_6', 'true');
+    localStorage.setItem('hasSeenWhatsNewV1_6_1', 'true');
     setIsOpen(false);
   };
 
@@ -32,9 +32,34 @@ export default function WhatsNewModal() {
     >
       <div className="px-2 pb-2">
         <div className="space-y-8 overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
-          {/* v1.6 Cinematic Hero Update */}
+          {/* v1.6.1 Scene Polish Update */}
           <section>
             <div className="inline-block bg-primary/15 text-primary text-[10px] font-black px-2 py-0.5 rounded-full mb-3 uppercase tracking-tighter border border-primary/20">
+              v1.6.1 — Scene Polish Update · April 2026
+            </div>
+            <ul className="space-y-3">
+              {[
+                { title: 'Wispy Clouds ☁️', desc: 'Layered cloud clusters drift slowly across the twilight sky at both shrine and city scroll depths.' },
+                { title: 'Grass Tufts 🌿', desc: '350 instanced meadow tufts cover the ground on both sides of the stone path with a gentle sway animation.' },
+                { title: 'Fireflies ✨', desc: '120 warm golden particles float and flicker above the grass and mid-distance, themed for a Japanese summer night.' },
+                { title: 'Mount Fuji 🗻', desc: 'Low-poly Fuji silhouette with snow cap rises behind the Tokyo skyline — visible at the final scroll chapter.' },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start">
+                  <span className="text-primary mr-3 mt-1 text-xs">◆</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground leading-tight">{item.title}</h4>
+                    <p className="text-[13px] text-muted leading-snug mt-0.5">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <hr className="border-border/50" />
+
+          {/* v1.6 Cinematic Hero Update */}
+          <section>
+            <div className="inline-block bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full mb-3 uppercase tracking-tighter border border-primary/10">
               v1.6 — Cinematic Hero Update
             </div>
             <ul className="space-y-3">
@@ -48,10 +73,10 @@ export default function WhatsNewModal() {
                 { title: 'Performance Optimized', desc: '~50 draw calls via InstancedMesh — console-grade rendering on web.' },
               ].map((item, i) => (
                 <li key={i} className="flex items-start">
-                  <span className="text-primary mr-3 mt-1 text-xs">◆</span>
+                  <span className="text-primary/60 mr-3 mt-1 text-xs">○</span>
                   <div>
-                    <h4 className="text-sm font-bold text-foreground leading-tight">{item.title}</h4>
-                    <p className="text-[13px] text-muted leading-snug mt-0.5">{item.desc}</p>
+                    <h4 className="text-sm font-medium text-foreground/80 leading-tight">{item.title}</h4>
+                    <p className="text-[12px] text-muted/80 leading-snug mt-0.5">{item.desc}</p>
                   </div>
                 </li>
               ))}

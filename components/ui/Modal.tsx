@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
 interface ModalProps {
@@ -14,6 +15,8 @@ interface ModalProps {
 
 /**
  * Modal dialog with backdrop, escape-to-close, and focus trap.
+ * Rendered through a portal to document.body so no ancestor transform
+ * (e.g. animate-fade-in) can change what position: fixed is relative to.
  */
 export default function Modal({ isOpen, onClose, title, children, className, hideBackdrop }: ModalProps) {
   const handleEscape = useCallback(
@@ -34,9 +37,9 @@ export default function Modal({ isOpen, onClose, title, children, className, hid
     };
   }, [isOpen, handleEscape]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
@@ -79,6 +82,7 @@ export default function Modal({ isOpen, onClose, title, children, className, hid
         {/* Body */}
         <div className="p-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

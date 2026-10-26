@@ -9,16 +9,18 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: '1. Who We Are',
-    body: `NihongoStudy is a free Japanese language study platform built and operated by Lorenzo Balitian, based in the Philippines.`,
+    body: `NihongoStudy is a free Japanese language study platform built and operated by Lorenzo Balitian, based in the Philippines. You can reach us at nihongostudy.support@gmail.com.`,
     contact: true,
   },
   {
     title: '2. What Data We Collect',
     list: [
-      'Email address (when you sign up)',
-      'Quiz scores and accuracy (to track your progress)',
-      'Study session data and SRS review history',
-      'Vocabulary flashcard progress (stored locally in your browser)',
+      'Account details when you sign up: your email address, a username you choose, and a password (stored in hashed form by our authentication provider, Supabase)',
+      'Profile and progress data: your JLPT level, study streak, number of quizzes taken, and the date your account was created',
+      'Quiz and exam results: quiz type, JLPT level, score, number of questions, accuracy, and date taken',
+      'Spaced repetition (SRS) review data: which items you reviewed, when, and your review schedule and streak',
+      'Flashcard mastery and daily progress counts (stored locally in your browser)',
+      'Technical data: your IP address, browser and device details, pages visited, and error and performance reports (collected through our error monitoring service, Sentry)',
       'No payment information — the platform is free',
     ],
   },
@@ -28,13 +30,14 @@ const sections = [
       'To save and display your quiz and exam results',
       'To power the Spaced Repetition System (SRS) for reviews',
       'To show your progress on the dashboard',
+      'To find and fix errors and monitor how the site performs',
       'We do not sell your data to anyone',
       'We do not use your data for advertising',
     ],
   },
   {
     title: '4. Data Storage',
-    body: `Your data is stored securely using Supabase (supabase.com), hosted on AWS infrastructure. Vocabulary flashcard progress is stored locally in your browser (localStorage) and never sent to our servers.`,
+    body: `Your account and study data are stored using Supabase (supabase.com) in an AWS data center in Tokyo, Japan. Row-level access rules mean each account can only read and change its own data. Flashcard mastery and daily progress counts are stored locally in your browser (localStorage). Error and performance reports, which include IP addresses, are sent to Sentry (sentry.io), whose servers are in the United States. Our hosting provider, Vercel, also processes visitor IP addresses in standard server logs. By using NihongoStudy you understand that your data is transferred to and processed in these countries. We keep your account and study data until you ask us to delete your account. Sentry keeps error and performance reports for up to 90 days.`,
   },
   {
     title: '5. Your Rights',
@@ -43,18 +46,20 @@ const sections = [
       'Access your personal data',
       'Request correction of inaccurate data',
       'Request deletion of your account and all data',
+      'Raise a question or complaint about how your data is handled (in the Philippines you may also contact the National Privacy Commission)',
     ],
-    footer: `To request account deletion, contact us via Ko-fi and we will process it within 7 business days.`,
+    footer: `To request access, correction, or deletion, email nihongostudy.support@gmail.com from the address you signed up with and include your username. We will process deletion requests within 7 business days. Deleting your account removes your profile, quiz results, and review data.`,
   },
   {
     title: '6. Cookies & Local Storage',
-    body: `We use browser localStorage to save your quiz settings and flashcard progress. We do not use advertising cookies or tracking cookies.`,
+    body: `We use your browser localStorage to keep you logged in, and to save your quiz settings, flashcard progress, and whether you have seen our update notice. We do not use advertising cookies or tracking cookies. When an error is reported, our error monitoring service may also receive request headers and cookies that your browser sends.`,
   },
   {
     title: '7. Third-Party Services',
     list: [
       'Supabase (database and authentication) — privacy policy at supabase.com/privacy',
       'Vercel (hosting) — privacy policy at vercel.com/legal/privacy-policy',
+      'Sentry (error and performance monitoring), privacy policy at sentry.io/privacy',
       'Jisho.org links — external links only, no data shared',
     ],
   },
@@ -68,7 +73,7 @@ const sections = [
   },
   {
     title: '10. Contact',
-    body: `For any privacy concerns or data deletion requests:`,
+    body: `For any privacy concerns or data deletion requests, email nihongostudy.support@gmail.com. Ko-fi is a secondary way to reach us.`,
     footer: `Lorenzo Balitian`,
     contact: true,
   },
@@ -82,7 +87,7 @@ export default function PrivacyPage() {
         <h1 className="text-3xl font-bold mb-2">
           <span className="font-jp">プライバシー</span> Privacy Policy
         </h1>
-        <p className="text-muted text-sm">Last updated: March 20, 2026</p>
+        <p className="text-muted text-sm">Last updated: October 25, 2026</p>
       </div>
 
       {/* Content card */}

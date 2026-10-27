@@ -165,7 +165,11 @@ export default function SignupPage() {
           </Button>
 
           <p className="text-xs text-muted text-center mt-3">
-            By signing up, you agree to our{' '}
+            By signing up, you confirm you are at least 13 and agree to our{' '}
+            <Link href="/terms" className="text-primary hover:underline">
+              Terms of Use
+            </Link>{' '}
+            and{' '}
             <Link href="/privacy" className="text-primary hover:underline">
               Privacy Policy
             </Link>

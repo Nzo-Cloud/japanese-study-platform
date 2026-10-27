@@ -50,11 +50,15 @@ export default function RootLayout({
             <Link href="/privacy" className="text-muted text-xs hover:text-primary transition-all">
               Privacy Policy
             </Link>
+            {' · '}
+            <Link href="/terms" className="text-muted text-xs hover:text-primary transition-all">
+              Terms of Use
+            </Link>
           </p>
           <div className="mt-2">
-            <a 
-              href="https://ko-fi.com/kuwago" 
-              target="_blank" 
+            <a
+              href="https://ko-fi.com/kuwago"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline transition-all"
             >

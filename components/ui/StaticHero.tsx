@@ -8,10 +8,10 @@ interface Props {
 }
 
 export default function StaticHero({ progress }: Props) {
-  const yText       = useTransform(progress, [0, 1], [0, -120]);
+  const yText = useTransform(progress, [0, 1], [0, -120]);
   const opacityHero = useTransform(progress, [0, 0.3], [1, 0]);
   const opacityCity = useTransform(progress, [0.3, 0.5, 0.85, 0.95], [0, 1, 1, 0]);
-  const scale       = useTransform(progress, [0, 1], [1, 1.08]);
+  const scale = useTransform(progress, [0, 1], [1, 1.08]);
 
   const petals = useMemo(() => Array.from({ length: 25 }).map((_, i) => ({
     id: i,
@@ -24,7 +24,7 @@ export default function StaticHero({ progress }: Props) {
   })), []);
 
   return (
-    <div style={{ position: 'relative', height: '300vh', background: '#080612' }}>
+    <div style={{ position: 'relative', height: '300vh', background: '#080612', clipPath: 'inset(0)' }}>
 
       {/* LAYER 1 — Gemini background image with parallax scale */}
       <motion.div style={{ position: 'fixed', inset: 0, zIndex: 1, scale }}>
